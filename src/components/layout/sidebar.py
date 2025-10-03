@@ -66,6 +66,11 @@ class Sidebar(QWidget):
             "Projects"
         )
         
+        self.profile_button = create_nav_button(
+            qta.icon('fa5s.user', color='#64748b'), 
+            "Profile"
+        )
+
         # Settings button with chevron (custom widget)
         self.settings_button, self.settings_icon_label, self.chevron_label = create_expandable_button(
             qta.icon('fa5s.cogs', color='#64748b'),
@@ -74,14 +79,12 @@ class Sidebar(QWidget):
             self.theme_manager
         )
 
-        self.profile_button = create_nav_button(
-            qta.icon('fa5s.user', color='#64748b'), 
-            "Profile"
-        )
-
         nav_layout.addWidget(self.dashboard_button)
         nav_layout.addWidget(self.analytics_button)
         nav_layout.addWidget(self.projects_button)
+
+        nav_layout.addWidget(self.profile_button)
+        
         nav_layout.addWidget(self.settings_button)
         
         # Settings submenu
@@ -89,8 +92,6 @@ class Sidebar(QWidget):
         nav_layout.addWidget(self.settings_submenu)
         self.settings_submenu.hide()
 
-        nav_layout.addWidget(self.profile_button)
-        
         layout.addWidget(nav_widget)
         layout.addStretch()
 
@@ -111,10 +112,10 @@ class Sidebar(QWidget):
             "dashboard": self.dashboard_button,
             "analytics": self.analytics_button,
             "projects": self.projects_button,
+            "profile": self.profile_button,
             "settings": self.settings_button,
             "general_settings": self.settings_submenu.general_settings_button,
             "user_management": self.settings_submenu.user_management_button,
-            "profile": self.profile_button,
         }
 
         # Connect signals

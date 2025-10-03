@@ -122,8 +122,110 @@ def get_light_stylesheet():
             color: {LIGHT_THEME["FOREGROUND"]};
         }}
 
-        /* Navbar and Footer */
-        Navbar, Footer {{
+        /* Navbar */
+        #Navbar {{
+            background-color: {LIGHT_THEME["CARD"]};
+            border-bottom: 1px solid {LIGHT_THEME["BORDER"]};
+            min-height: 64px;
+            max-height: 64px;
+        }}
+
+        /* Navbar Icon Buttons */
+        #NavbarIconButton {{
+            background-color: transparent;
+            border: none;
+            border-radius: 8px;
+            padding: 8px;
+        }}
+
+        #NavbarIconButton:hover {{
+            background-color: {LIGHT_THEME["HOVER"]};
+        }}
+
+        #NavbarIconButton:pressed {{
+            background-color: {LIGHT_THEME["SECONDARY"]};
+        }}
+
+        /* Avatar Container */
+        #AvatarContainer {{
+            background-color: transparent;
+            border: none;
+            border-radius: 22px;
+            padding: 4px;
+        }}
+
+        #AvatarContainer:hover {{
+            background-color: rgba(59, 130, 246, 0.1);
+        }}
+
+        /* Override button styles for avatar area */
+        #AvatarContainer QPushButton {{
+            background-color: transparent;
+            border: none;
+            padding: 0px;
+        }}
+
+        /* Dropdown Menu */
+        #DropdownMenu {{
+            background-color: {LIGHT_THEME["CARD"]};
+            border: 1px solid {LIGHT_THEME["BORDER"]};
+            border-radius: 12px;
+            min-width: 220px;
+        }}
+
+        /* User Info in Dropdown */
+        #UserInfo {{
+            background-color: transparent;
+        }}
+
+        #UserName {{
+            color: {LIGHT_THEME["FOREGROUND"]};
+            font-weight: 600;
+            font-size: 14px;
+        }}
+
+        #UserEmail {{
+            color: {LIGHT_THEME["MUTED_FOREGROUND"]};
+            font-size: 12px;
+        }}
+
+        /* Menu Separator */
+        #MenuSeparator {{
+            background-color: {LIGHT_THEME["BORDER"]};
+            border: none;
+        }}
+
+        /* Menu Items */
+        #MenuItem {{
+            background-color: transparent;
+            color: {LIGHT_THEME["FOREGROUND"]};
+            border: none;
+            border-radius: 6px;
+            text-align: left;
+            padding: 8px 12px;
+            font-size: 14px;
+        }}
+
+        #MenuItem:hover {{
+            background-color: {LIGHT_THEME["HOVER"]};
+        }}
+
+        #DangerMenuItem {{
+            background-color: transparent;
+            color: #ef4444;
+            border: none;
+            border-radius: 6px;
+            text-align: left;
+            padding: 8px 12px;
+            font-size: 14px;
+        }}
+
+        #DangerMenuItem:hover {{
+            background-color: rgba(239, 68, 68, 0.1);
+        }}
+
+        /* Footer */
+        Footer {{
             background-color: {LIGHT_THEME["CARD"]};
             border: 1px solid {LIGHT_THEME["BORDER"]};
         }}

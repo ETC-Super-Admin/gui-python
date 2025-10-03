@@ -122,8 +122,91 @@ def get_dark_stylesheet():
             color: {DARK_THEME["FOREGROUND"]};
         }}
 
-        /* Navbar and Footer */
-        Navbar, Footer {{
+        /* Navbar */
+        #Navbar {{
+            background-color: {DARK_THEME["CARD"]};
+            border-bottom: 1px solid {DARK_THEME["BORDER"]};
+            min-height: 64px;
+            max-height: 64px;
+        }}
+
+        /* Navbar Icon Buttons */
+        #NavbarIconButton {{
+            background-color: transparent;
+            border: none;
+            border-radius: 8px;
+            padding: 8px;
+        }}
+
+        #NavbarIconButton:hover {{
+            background-color: {DARK_THEME["HOVER"]};
+        }}
+
+        #NavbarIconButton:pressed {{
+            background-color: {DARK_THEME["SECONDARY"]};
+        }}
+
+        /* Dropdown Menu */
+        #DropdownMenu {{
+            background-color: {DARK_THEME["CARD"]};
+            border: 1px solid {DARK_THEME["BORDER"]};
+            border-radius: 12px;
+            min-width: 220px;
+        }}
+
+        /* User Info in Dropdown */
+        #UserInfo {{
+            background-color: transparent;
+        }}
+
+        #UserName {{
+            color: {DARK_THEME["FOREGROUND"]};
+            font-weight: 600;
+            font-size: 14px;
+        }}
+
+        #UserEmail {{
+            color: {DARK_THEME["MUTED_FOREGROUND"]};
+            font-size: 12px;
+        }}
+
+        /* Menu Separator */
+        #MenuSeparator {{
+            background-color: {DARK_THEME["BORDER"]};
+            border: none;
+        }}
+
+        /* Menu Items */
+        #MenuItem {{
+            background-color: transparent;
+            color: {DARK_THEME["FOREGROUND"]};
+            border: none;
+            border-radius: 6px;
+            text-align: left;
+            padding: 8px 12px;
+            font-size: 14px;
+        }}
+
+        #MenuItem:hover {{
+            background-color: {DARK_THEME["HOVER"]};
+        }}
+
+        #DangerMenuItem {{
+            background-color: transparent;
+            color: #ef4444;
+            border: none;
+            border-radius: 6px;
+            text-align: left;
+            padding: 8px 12px;
+            font-size: 14px;
+        }}
+
+        #DangerMenuItem:hover {{
+            background-color: rgba(239, 68, 68, 0.1);
+        }}
+
+        /* Footer */
+        Footer {{
             background-color: {DARK_THEME["CARD"]};
             border: 1px solid {DARK_THEME["BORDER"]};
         }}
