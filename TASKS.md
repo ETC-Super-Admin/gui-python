@@ -2,46 +2,46 @@
 
 ## Phase 1: Project Setup & Scaffolding
 
-- [ ] Initialize project structure with `src`, `main.py`, etc.
-- [ ] Create main application window and layout.
-- [ ] Scaffold empty component files (`navbar`, `sidebar`, `footer`).
-- [ ] Scaffold empty page files (`dashboard`, `profile`, `settings`).
-- [ ] Set up a virtual environment.
-- [ ] Create a `requirements.txt` file.
-- [ ] Add `.gitignore` for Python projects.
-- [ ] Set up logging configuration.
+- [X] Initialize project structure with `src`, `main.py`, etc.
+- [X] Create main application window and layout.
+- [X] Scaffold empty component files (`navbar`, `sidebar`, `footer`).
+- [X] Scaffold empty page files (`dashboard`, `profile`, `settings`).
+- [X] Set up a virtual environment.
+- [X] Create a `requirements.txt` file.
+- [X] Add `.gitignore` for Python projects.
+- [X] Set up logging configuration.
 
 ## Phase 2: Core Feature Implementation
 
-- [ ] Implement basic layout with Navbar, Sidebar, and Footer.
-- [ ] Implement page switching logic with `QStackedWidget`.
-- [ ] Add content to Dashboard page.
-- [ ] Add content to Profile page.
-- [ ] Add content to Settings page.
-- [ ] Implement a data model for the application.
-- [ ] Create a service layer for business logic.
-- [ ] Implement error boundary/handler for graceful error display.
+- [X] Implement basic layout with Navbar, Sidebar, and Footer.
+- [X] Implement page switching logic with `QStackedWidget`.
+- [X] Add content to Dashboard page.
+- [X] Add content to Profile page.
+- [X] Add content to Settings page.
+- [X] Implement a data model for the application.
+- [X] Create a service layer for business logic.
+- [X] Implement error boundary/handler for graceful error display.
 
 ## Phase 3: Styling & Theming
 
-- [ ] Implement theme switching functionality.
-- [ ] Add `QtAwesome` for icons.
-- [ ] Create `ThemeManager` component with theme toggle button.
-- [ ] Add theme toggle button to Navbar.
-- [ ] Add support for custom themes.
-- [ ] Create a theme editor.
-- [ ] Implement theme persistence (remember user's theme choice).
+- [X] Implement theme switching functionality.
+- [X] Add `QtAwesome` for icons.
+- [X] Create `ThemeManager` component with theme toggle button.
+- [X] Add theme toggle button to Navbar.
+- [X] Add support for custom themes.
+- [X] Create a theme editor.
+- [X] Implement theme persistence (remember user's theme choice).
 
 ## Phase 4: Refactoring & Maintenance
 
-- [ ] Handle file moves and fix broken imports.
-- [ ] Refactor stylesheets to use a template and theme variables.
-- [ ] Create a `README.md` with updated instructions.
-- [ ] Create `TASKS.md` to track project progress.
-- [ ] Refactor component code into smaller, reusable widgets.
-- [ ] Implement a logging framework.
-- [ ] Add code documentation and docstrings.
-- [ ] Set up code formatting (Black/autopep8) and linting (pylint/flake8).
+- [x] Handle file moves and fix broken imports.
+- [x] Refactor stylesheets to use a template and theme variables.
+- [x] Create a `README.md` with updated instructions.
+- [x] Create `TASKS.md` to track project progress.
+- [x] Refactor component code into smaller, reusable widgets.
+- [x] Implement a logging framework.
+- [x] Add code documentation and docstrings.
+- [x] Set up code formatting (Black/autopep8) and linting (pylint/flake8).
 
 ## Phase 5: Authentication & Authorization System
 
