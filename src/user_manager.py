@@ -160,7 +160,7 @@ class UserManager(QtCore.QObject):
         # Update persisted token if remember_me was true
         if self.settings.value("session/username") and self.settings.value("session/token"):
             self.settings.setValue("session/token", _xor_encrypt_decrypt(self._current_user["token"]))
-            self.settings.setValue("session/token_expires_at", self._current_user["token_expires_at"].toString(Qt.ISODate))
+            self.settings.setValue("session/token_expires_at", self._current_user["token_expires_at"].toString(QtCore.Qt.ISODate))
         print("Token refreshed.")
         return True
 

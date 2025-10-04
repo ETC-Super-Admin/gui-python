@@ -11,7 +11,13 @@ from src.app.settings.settings import Settings
 from src.app.profile.profile import Profile
 from src.app.help.help import Help
 from src.app.bills_process.bills_process import BillsProcess
+from src.app.bills_process.cell_config import CellConfig
+from src.app.bills_process.path_config import PathConfig
 from src.app.shipping_label.shipping_label import ShippingLabel
+from src.app.shipping_label.live_view import LiveView
+from src.app.shipping_label.label_asset import LabelAsset
+from src.app.shipping_label.sender_management import SenderManagement
+from src.app.shipping_label.receiver_management import ReceiverManagement
 from src.app.admin.admin import Admin
 from src.app.admin.timesheets import Timesheets
 from src.app.access_denied import AccessDenied
@@ -27,8 +33,8 @@ class MainLayout(QWidget):
         self.user_manager = UserManager()
 
         self.permission_matrix = {
-            "admin": ["dashboard", "analytics", "projects", "settings", "general_settings", "user_management", "profile", "help", "bills_process", "shipping_label", "admin", "timesheets"],
-            "user": ["dashboard", "analytics", "projects", "settings", "general_settings", "profile", "help", "bills_process", "shipping_label"],
+            "admin": ["dashboard", "analytics", "projects", "settings", "general_settings", "user_management", "profile", "help", "bills_process", "cell_config", "path_config", "shipping_label", "live_view", "label_asset", "sender_management", "receiver_management", "admin", "timesheets"],
+            "user": ["dashboard", "analytics", "projects", "settings", "general_settings", "profile", "help", "bills_process", "cell_config", "path_config", "shipping_label", "live_view", "label_asset", "sender_management", "receiver_management"],
         }
 
         main_layout = QHBoxLayout(self)
@@ -69,7 +75,13 @@ class MainLayout(QWidget):
             "profile": Profile(),
             "help": Help(),
             "bills_process": BillsProcess(),
+            "cell_config": CellConfig(),
+            "path_config": PathConfig(),
             "shipping_label": ShippingLabel(),
+            "live_view": LiveView(),
+            "label_asset": LabelAsset(),
+            "sender_management": SenderManagement(),
+            "receiver_management": ReceiverManagement(),
             "admin": Admin(),
             "timesheets": Timesheets(),
             "access_denied": AccessDenied(),
