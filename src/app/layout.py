@@ -1,77 +1,102 @@
-
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QStackedWidget, QSizePolicy
-from PySide6.QtCore import QPropertyAnimation, QEasingCurve
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QStackedWidget, QSizePolicy, QApplication
+from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Signal
 from src.components.layout.navbar import Navbar
 from src.components.layout.sidebar import Sidebar
-from src.components.layout.footer import Footer
 from src.app.dashboard.dashboard import Dashboard
-from src.app.settings.settings import Settings
-from src.app.profile.profile import Profile
 from src.app.analytics.analytics import Analytics
 from src.app.projects.projects import Projects
 from src.app.settings.general_settings import GeneralSettings
-from src.app.settings.user_management import UserManagement
+from src.app.admin.user_management import UserManagement
+from src.app.settings.settings import Settings
+from src.app.profile.profile import Profile
+from src.app.help.help import Help
+from src.app.bills_process.bills_process import BillsProcess
+from src.app.shipping_label.shipping_label import ShippingLabel
+from src.app.admin.admin import Admin
+from src.app.admin.timesheets import Timesheets
+from src.app.access_denied import AccessDenied
+from src.user_manager import UserManager
 
 class MainLayout(QWidget):
-    def __init__(self, theme_manager):
-        super().__init__()
+    reauthenticate_requested = Signal()
 
-        # Main layout
+    def __init__(self, theme_manager, username, role):
+        super().__init__()
+        self.username = username
+        self.role = role
+        self.user_manager = UserManager()
+
+        self.permission_matrix = {
+            "admin": ["dashboard", "analytics", "projects", "settings", "general_settings", "user_management", "profile", "help", "bills_process", "shipping_label", "admin", "timesheets"],
+            "user": ["dashboard", "analytics", "projects", "settings", "general_settings", "profile", "help", "bills_process", "shipping_label"],
+        }
+
         main_layout = QHBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
 
-        # Sidebar
-        self.sidebar = Sidebar(theme_manager)
+        self.sidebar = Sidebar(theme_manager, username, role)
         self.sidebar.setMinimumWidth(0)
-        self.sidebar.setMaximumWidth(300) # Initial width
+        self.sidebar.setMaximumWidth(300)
         self.sidebar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         main_layout.addWidget(self.sidebar, 1)
 
-        # Sidebar animation
         self.sidebar_animation = QPropertyAnimation(self.sidebar, b"maximumWidth")
         self.sidebar_animation.setDuration(250)
         self.sidebar_animation.setEasingCurve(QEasingCurve.InOutQuart)
 
-        # Content area
         content_area = QWidget()
         content_layout = QVBoxLayout(content_area)
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(0)
         main_layout.addWidget(content_area, 4)
 
-        # Navbar
-        self.navbar = Navbar(theme_manager)
+        self.navbar = Navbar(theme_manager, username, role)
+        initials = username[0].upper() if username else ""
+        self.navbar.set_user_info(username, "john.doe@example.com", initials)
         content_layout.addWidget(self.navbar)
 
-        # Page container
         self.page_container = QStackedWidget()
         content_layout.addWidget(self.page_container)
 
-        # Add pages
-        self.dashboard_page = Dashboard()
-        self.analytics_page = Analytics()
-        self.projects_page = Projects()
-        self.settings_page = Settings()
-        self.general_settings_page = GeneralSettings()
-        self.user_management_page = UserManagement()
-        self.profile_page = Profile()
-        self.page_container.addWidget(self.dashboard_page)
-        self.page_container.addWidget(self.analytics_page)
-        self.page_container.addWidget(self.projects_page)
-        self.page_container.addWidget(self.settings_page)
-        self.page_container.addWidget(self.general_settings_page)
-        self.page_container.addWidget(self.user_management_page)
-        self.page_container.addWidget(self.profile_page)
+        self.pages = {
+            "dashboard": Dashboard(),
+            "analytics": Analytics(),
+            "projects": Projects(),
+            "settings": Settings(),
+            "general_settings": GeneralSettings(),
+            "user_management": UserManagement(),
+            "profile": Profile(),
+            "help": Help(),
+            "bills_process": BillsProcess(),
+            "shipping_label": ShippingLabel(),
+            "admin": Admin(),
+            "timesheets": Timesheets(),
+            "access_denied": AccessDenied(),
+        }
 
-        # Footer
-        self.footer = Footer()
-        content_layout.addWidget(self.footer)
+        for page in self.pages.values():
+            self.page_container.addWidget(page)
 
-        # Connect sidebar signals to page switching
         self.sidebar.page_changed.connect(self.switch_page)
-
         self.navbar.sidebar_toggled.connect(self.toggle_sidebar)
+        self.navbar.profile_requested.connect(lambda: self.switch_page("profile"))
+        self.navbar.settings_requested.connect(lambda: self.switch_page("settings"))
+        self.navbar.switch_account_requested.connect(self._handle_switch_account)
+
+        last_active_page = self.user_manager.get_last_active_page()
+        self.switch_page(last_active_page)
+
+    def update_user_info(self, username, role):
+        self.username = username
+        self.role = role
+        initials = username[0].upper() if username else ""
+        self.navbar.set_user_info(username, "john.doe@example.com", initials)
+        self.sidebar.update_user_info(username, role)
+
+        destination = self.user_manager.intended_destination or self.user_manager.get_last_active_page()
+        self.switch_page(destination)
+        self.user_manager.intended_destination = None
 
     def toggle_sidebar(self):
         is_expanded = self.sidebar.maximumWidth() == 300
@@ -84,18 +109,27 @@ class MainLayout(QWidget):
         self.sidebar_animation.start()
         self.navbar.update_sidebar_toggle_icon(not is_expanded)
 
+    def _handle_switch_account(self):
+        self.user_manager.logout()
+
     def switch_page(self, page_name):
-        if page_name == "dashboard":
-            self.page_container.setCurrentWidget(self.dashboard_page)
-        elif page_name == "analytics":
-            self.page_container.setCurrentWidget(self.analytics_page)
-        elif page_name == "projects":
-            self.page_container.setCurrentWidget(self.projects_page)
-        elif page_name == "settings":
-            self.page_container.setCurrentWidget(self.settings_page)
-        elif page_name == "general_settings":
-            self.page_container.setCurrentWidget(self.general_settings_page)
-        elif page_name == "user_management":
-            self.page_container.setCurrentWidget(self.user_management_page)
-        elif page_name == "profile":
-            self.page_container.setCurrentWidget(self.profile_page)
+        if page_name not in self.pages:
+            print(f"Page '{page_name}' not found, defaulting to dashboard.")
+            page_name = "dashboard"
+
+        has_permission = self.role in self.permission_matrix and page_name in self.permission_matrix.get(self.role, [])
+
+        if has_permission:
+            self.page_container.setCurrentWidget(self.pages[page_name])
+            self.sidebar.set_active_button(page_name)
+            self.user_manager.save_last_active_page(page_name)
+        else:
+            if self.user_manager.is_logged_in():
+                self.page_container.setCurrentWidget(self.pages["dashboard"])
+                self.sidebar.set_active_button("dashboard")
+                self.user_manager.save_last_active_page("dashboard")
+            else:
+                self.user_manager.intended_destination = page_name
+                self.reauthenticate_requested.emit()
+                self.page_container.setCurrentWidget(self.pages["dashboard"])
+                self.sidebar.set_active_button("dashboard")

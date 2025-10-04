@@ -19,6 +19,10 @@ LIGHT_THEME = {
     "HOVER": "#e2e8f0",
     "CARD": "#ffffff",
     "CARD_FOREGROUND": "#020817",
+    "SUCCESS": "#22c55e",
+    "SUCCESS_FOREGROUND": "#f8fafc",
+    "WARNING": "#f59e0b",
+    "WARNING_FOREGROUND": "#020817",
 }
 
 DARK_THEME = {
@@ -41,4 +45,8 @@ DARK_THEME = {
     "HOVER": "#1e293b",
     "CARD": "#020817",
     "CARD_FOREGROUND": "#f8fafc",
+    "SUCCESS": "#16a34a",
+    "SUCCESS_FOREGROUND": "#f8fafc",
+    "WARNING": "#d97706",
+    "WARNING_FOREGROUND": "#f8fafc",
 }

@@ -57,12 +57,12 @@ class DropdownMenu(QFrame):
     logout_clicked = Signal()
     profile_clicked = Signal()
     settings_clicked = Signal()
+    switch_account_clicked = Signal() # New signal
     
-    def __init__(self, parent=None):
+    def __init__(self, user_info, parent=None):
         super().__init__(parent)
         self.setObjectName("DropdownMenu")
         self.setWindowFlags(Qt.Popup | Qt.FramelessWindowHint)
-        self.setAttribute(Qt.WA_TranslucentBackground)
         
         # Add shadow effect
         shadow = QGraphicsDropShadowEffect()
@@ -72,27 +72,27 @@ class DropdownMenu(QFrame):
         shadow.setColor(QColor(0, 0, 0, 80))
         self.setGraphicsEffect(shadow)
         
-        self.setup_ui()
+        self.setup_ui(user_info)
         
-    def setup_ui(self):
+    def setup_ui(self, user_info):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(8, 8, 8, 8)
         layout.setSpacing(4)
         
         # User info section
-        user_info = QWidget()
-        user_info.setObjectName("UserInfo")
-        user_layout = QVBoxLayout(user_info)
+        user_info_widget = QWidget()
+        user_info_widget.setObjectName("UserInfo")
+        user_layout = QVBoxLayout(user_info_widget)
         user_layout.setContentsMargins(12, 8, 12, 8)
         
-        name_label = QLabel("John Doe")
+        name_label = QLabel(user_info.get("name", ""))
         name_label.setObjectName("UserName")
-        email_label = QLabel("john.doe@example.com")
+        email_label = QLabel(user_info.get("email", ""))
         email_label.setObjectName("UserEmail")
         
         user_layout.addWidget(name_label)
         user_layout.addWidget(email_label)
-        layout.addWidget(user_info)
+        layout.addWidget(user_info_widget)
         
         # Separator
         separator = QFrame()
@@ -109,6 +109,10 @@ class DropdownMenu(QFrame):
         self.settings_btn = self.create_menu_item("fa5s.cog", "Settings")
         self.settings_btn.clicked.connect(self.settings_clicked)
         layout.addWidget(self.settings_btn)
+
+        self.switch_account_btn = self.create_menu_item("fa5s.exchange-alt", "Switch Account")
+        self.switch_account_btn.clicked.connect(self.switch_account_clicked)
+        layout.addWidget(self.switch_account_btn)
         
         # Another separator
         separator2 = QFrame()
@@ -134,14 +138,18 @@ class Navbar(QWidget):
     logout_requested = Signal()
     profile_requested = Signal()
     settings_requested = Signal()
+    switch_account_requested = Signal() # New signal
 
-    def __init__(self, theme_manager):
+    def __init__(self, theme_manager, username, role):
         super().__init__()
         self.setObjectName("Navbar")
         self.theme_manager = theme_manager
         self.is_dark_theme = False
         self.dropdown_menu = None
         self.dropdown_visible = False
+        self.user_info = {"name": username, "email": "", "initials": username[0].upper() if username else ""}
+        self.username = username
+        self.role = role
         
         self.setup_ui()
 
@@ -210,10 +218,11 @@ class Navbar(QWidget):
     def show_dropdown_menu(self):
         """Show the dropdown menu"""
         if self.dropdown_menu is None:
-            self.dropdown_menu = DropdownMenu(self)
+            self.dropdown_menu = DropdownMenu(self.user_info, None)
             self.dropdown_menu.logout_clicked.connect(self.on_logout_clicked)
             self.dropdown_menu.profile_clicked.connect(self.on_profile_clicked)
             self.dropdown_menu.settings_clicked.connect(self.on_settings_clicked)
+            self.dropdown_menu.switch_account_clicked.connect(self.on_switch_account_clicked)
         
         # Position dropdown below avatar
         pos = self.avatar.mapToGlobal(QPoint(0, 0))
@@ -224,6 +233,7 @@ class Navbar(QWidget):
             pos.y() + self.avatar.height() + 8
         )
         self.dropdown_menu.show()
+        self.dropdown_menu.raise_()
         self.dropdown_visible = True
     
     def on_logout_clicked(self):
@@ -231,7 +241,12 @@ class Navbar(QWidget):
         if self.dropdown_menu:
             self.dropdown_menu.hide()
             self.dropdown_visible = False
-        self.logout_requested.emit()
+        
+        from PySide6.QtWidgets import QMessageBox
+        reply = QMessageBox.question(self, 'Logout', "Are you sure you want to log out?",
+                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            self.logout_requested.emit()
     
     def on_profile_clicked(self):
         """Handle profile click"""
@@ -246,9 +261,22 @@ class Navbar(QWidget):
             self.dropdown_menu.hide()
             self.dropdown_visible = False
         self.settings_requested.emit()
+
+    def on_switch_account_clicked(self):
+        """Handle switch account click"""
+        if self.dropdown_menu:
+            self.dropdown_menu.hide()
+            self.dropdown_visible = False
+        self.switch_account_requested.emit()
     
     def set_user_info(self, name, email, initials=None):
         """Update user information displayed in navbar and dropdown"""
-        if initials:
+        self.user_info["name"] = name
+        self.user_info["email"] = email
+        if initials is not None:
+            self.user_info["initials"] = initials
             self.avatar.initials = initials
             self.avatar.update()
+        
+        # Invalidate the dropdown to recreate it with new info
+        self.dropdown_menu = None

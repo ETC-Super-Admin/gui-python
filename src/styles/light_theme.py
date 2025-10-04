@@ -167,7 +167,7 @@ def get_light_stylesheet():
 
         /* Dropdown Menu */
         #DropdownMenu {{
-            background-color: {LIGHT_THEME["CARD"]};
+            background-color: {LIGHT_THEME["BACKGROUND"]};
             border: 1px solid {LIGHT_THEME["BORDER"]};
             border-radius: 12px;
             min-width: 220px;
@@ -224,12 +224,6 @@ def get_light_stylesheet():
             background-color: rgba(239, 68, 68, 0.1);
         }}
 
-        /* Footer */
-        Footer {{
-            background-color: {LIGHT_THEME["CARD"]};
-            border: 1px solid {LIGHT_THEME["BORDER"]};
-        }}
-
         /* Scrollbar */
         QScrollBar:vertical {{
             background-color: {LIGHT_THEME["CARD"]};
@@ -249,5 +243,183 @@ def get_light_stylesheet():
 
         QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
             height: 0px;
+        }}
+
+        /* QTableWidget */
+        QTableWidget {{
+            background-color: {LIGHT_THEME["CARD"]};
+            border: 1px solid {LIGHT_THEME["BORDER"]};
+            border-radius: 8px;
+            selection-background-color: {LIGHT_THEME["PRIMARY"]};
+            selection-color: {LIGHT_THEME["PRIMARY_FOREGROUND"]};
+            gridline-color: {LIGHT_THEME["BORDER"]};
+        }}
+
+        QTableWidget::item {{
+            padding: 8px;
+            color: {LIGHT_THEME["FOREGROUND"]};
+        }}
+
+        QTableWidget::item:selected {{
+            background-color: {LIGHT_THEME["PRIMARY"]};
+            color: {LIGHT_THEME["PRIMARY_FOREGROUND"]};
+        }}
+
+        /* Table Header */
+        QHeaderView::section {{
+            background-color: {LIGHT_THEME["SECONDARY"]};
+            color: {LIGHT_THEME["SECONDARY_FOREGROUND"]};
+            padding: 8px;
+            border: 1px solid {LIGHT_THEME["BORDER"]};
+            border-left: none;
+            border-right: none;
+            font-weight: bold;
+        }}
+
+        QHeaderView::section:horizontal {{
+            border-top: none;
+            border-bottom: 1px solid {LIGHT_THEME["BORDER"]};
+        }}
+
+        QHeaderView::section:vertical {{
+            border-left: none;
+            border-right: 1px solid {LIGHT_THEME["BORDER"]};
+        }}
+
+        /* Login Dialog */
+        #LoginDialog {{
+            background-color: {LIGHT_THEME["BACKGROUND"]};
+            border: 1px solid {LIGHT_THEME["BORDER"]};
+            border-radius: 12px;
+        }}
+
+        #LoginLogo {{
+            color: {LIGHT_THEME["PRIMARY"]};
+        }}
+
+        #LoginInput QLineEdit {{
+            background-color: {LIGHT_THEME["CARD"]};
+            color: {LIGHT_THEME["FOREGROUND"]};
+            border: 1px solid {LIGHT_THEME["BORDER"]};
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 14px;
+        }}
+
+        #LoginInput QLineEdit:focus {{
+            border: 1px solid {LIGHT_THEME["PRIMARY"]};
+        }}
+
+        #LoginTogglePasswordButton {{
+            background-color: {LIGHT_THEME["SECONDARY"]};
+            color: {LIGHT_THEME["SECONDARY_FOREGROUND"]};
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+        }}
+
+        #LoginTogglePasswordButton:hover {{
+            background-color: {LIGHT_THEME["HOVER"]};
+        }}
+
+        #LoginTogglePasswordButton:checked {{
+            background-color: {LIGHT_THEME["PRIMARY"]};
+            color: {LIGHT_THEME["PRIMARY_FOREGROUND"]};
+        }}
+
+        #LoginCheckbox {{
+            color: {LIGHT_THEME["TEXT"]};
+            font-size: 13px;
+        }}
+
+        #LoginCheckbox::indicator {{
+            border: 2px solid {LIGHT_THEME["MUTED_FOREGROUND"]};
+            background-color: {LIGHT_THEME["BACKGROUND"]};
+            border-radius: 4px;
+            width: 16px;
+            height: 16px;
+        }}
+
+        #LoginCheckbox::indicator:hover {{
+            border: 2px solid {LIGHT_THEME["RING"]};
+        }}
+
+        #LoginCheckbox::indicator:checked {{
+            background-color: {LIGHT_THEME["PRIMARY"]};
+            border: 2px solid {LIGHT_THEME["PRIMARY"]};
+        }}
+
+        #LoginLink {{
+            color: {LIGHT_THEME["MUTED_FOREGROUND"]};
+            font-size: 13px;
+        }}
+
+        #LoginLink a {{
+            color: {LIGHT_THEME["PRIMARY"]};
+            text-decoration: none;
+        }}
+
+        #LoginLink a:hover {{
+            text-decoration: underline;
+        }}
+
+        #LoginButton {{
+            background-color: {LIGHT_THEME["PRIMARY"]};
+            color: {LIGHT_THEME["PRIMARY_FOREGROUND"]};
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-weight: bold;
+            font-size: 16px;
+        }}
+
+        #LoginButton:hover {{
+            background-color: {LIGHT_THEME["RING"]};
+        }}
+
+        #LoginButton:disabled {{
+            background-color: {LIGHT_THEME["MUTED"]};
+            color: {LIGHT_THEME["MUTED_FOREGROUND"]};
+        }}
+
+        /* User Management Buttons */
+        #AddUserButton {{
+            background-color: #22c55e; /* Tailwind green-500 */
+            color: {LIGHT_THEME["PRIMARY_FOREGROUND"]};
+        }}
+        #AddUserButton:hover {{
+            background-color: #16a34a; /* Tailwind green-600 */
+        }}
+
+        #EditUserButton {{
+            background-color: #f59e0b; /* Tailwind amber-500 */
+            color: {LIGHT_THEME["PRIMARY_FOREGROUND"]};
+        }}
+        #EditUserButton:hover {{
+            background-color: #d97706; /* Tailwind amber-600 */
+        }}
+
+        #DeleteUserButton {{
+            background-color: #ef4444; /* Tailwind red-500 */
+            color: {LIGHT_THEME["PRIMARY_FOREGROUND"]};
+        }}
+        #DeleteUserButton:hover {{
+            background-color: #dc2626; /* Tailwind red-600 */
+        }}
+
+        #SaveUserButton {{
+            background-color: {LIGHT_THEME["PRIMARY"]};
+            color: {LIGHT_THEME["PRIMARY_FOREGROUND"]};
+        }}
+        #SaveUserButton:hover {{
+            background-color: {LIGHT_THEME["RING"]};
+        }}
+
+        #CancelFormButton {{
+            background-color: {LIGHT_THEME["SECONDARY"]};
+            color: {LIGHT_THEME["SECONDARY_FOREGROUND"]};
+        }}
+        #CancelFormButton:hover {{
+            background-color: {LIGHT_THEME["MUTED"]};
         }}
     """

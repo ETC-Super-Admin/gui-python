@@ -21,7 +21,7 @@ def create_nav_button(icon, text, is_sub_button=False):
     return button
 
 
-def create_expandable_button(icon, text, toggle_function, theme_manager):
+def create_expandable_button(icon_name_str, text, toggle_function, theme_manager):
     """Create a button with an expandable chevron indicator"""
     container = QWidget()
     container.setObjectName("SidebarButton")
@@ -37,7 +37,7 @@ def create_expandable_button(icon, text, toggle_function, theme_manager):
     
     # Main icon
     settings_icon_label = QLabel()
-    settings_icon_label.setPixmap(icon.pixmap(16, 16))
+    settings_icon_label.setPixmap(qta.icon(icon_name_str, color='#64748b').pixmap(16, 16))
     layout.addWidget(settings_icon_label)
     
     # Text label
@@ -59,13 +59,13 @@ def create_expandable_button(icon, text, toggle_function, theme_manager):
     
     # Store references
     container.setCheckable = lambda x: None  # Dummy method for compatibility
-    container.setChecked = lambda x: update_expandable_button_state(container, x, theme_manager, settings_icon_label, chevron_label)
+    container.setChecked = lambda x: update_expandable_button_state(container, x, theme_manager, settings_icon_label, chevron_label, icon_name_str)
     container.isChecked = lambda: False # This will be handled by the parent
     
     return container, settings_icon_label, chevron_label
 
 
-def update_expandable_button_state(container, checked, theme_manager, settings_icon_label, chevron_label):
+def update_expandable_button_state(container, checked, theme_manager, settings_icon_label, chevron_label, icon_name_str):
     """Update the visual state of expandable button"""
     current_theme = theme_manager.get_current_theme_colors()
     
@@ -83,7 +83,7 @@ def update_expandable_button_state(container, checked, theme_manager, settings_i
         icon_color = '#64748b'
     
     # Update main icon
-    settings_icon = qta.icon('fa5s.cogs', color=icon_color)
+    settings_icon = qta.icon(icon_name_str, color=icon_color)
     settings_icon_label.setPixmap(settings_icon.pixmap(16, 16))
     
     # Update text color
