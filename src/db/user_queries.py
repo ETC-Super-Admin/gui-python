@@ -81,39 +81,6 @@ def get_user_role(username):
         result = cursor.fetchone()
         return result[0] if result else None
 
-if __name__ == "__main__":
-    initialize_db()
-    print("Database initialized and 'users' table created.")
-
-    # Example usage:
-    # Add an admin user from .env
-    admin_username = "admin" # Replace with actual admin username from .env
-    admin_password = "123456" # Replace with actual admin password from .env
-    if add_user(admin_username, admin_password, 'admin'):
-        print(f"Admin user '{admin_username}' added.")
-    else:
-        print(f"Admin user '{admin_username}' already exists.")
-
-    # Add a regular user
-    if add_user("testuser", "password123"):
-        print("User 'testuser' added.")
-
-    # Verify users
-    if verify_user("admin", "123456"):
-        print("Admin user verified successfully.")
-    else:
-        print("Admin user verification failed.")
-
-    if verify_user("testuser", "password123"):
-        print("Test user verified successfully.")
-    else:
-        print("Test user verification failed.")
-
-    if verify_user("testuser", "wrongpassword"):
-        print("Test user with wrong password verified (ERROR).")
-    else:
-        print("Test user with wrong password verification failed (CORRECT).")
-
 def get_all_users():
     """Retrieves all users from the database."""
     with sqlite3.connect(DATABASE_NAME) as conn:
@@ -181,60 +148,3 @@ def delete_user(user_id):
         cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
         conn.commit()
         return cursor.rowcount > 0, "User deleted successfully."
-
-if __name__ == "__main__":
-    initialize_db()
-    print("Database initialized and 'users' table created.")
-
-    # Example usage:
-    # Add an admin user from .env
-    admin_username = "admin" # Replace with actual admin username from .env
-    admin_password = "123456" # Replace with actual admin password from .env
-    if add_user(admin_username, admin_password, email="admin@example.com", role='admin')[0]:
-        print(f"Admin user '{admin_username}' added.")
-    else:
-        print(f"Admin user '{admin_username}' already exists.")
-
-    # Add a regular user
-    if add_user("testuser", "password123", email="test@example.com")[0]:
-        print("User 'testuser' added.")
-
-    # Verify users
-    if verify_user("admin", "123456"):
-        print("Admin user verified successfully.")
-    else:
-        print("Admin user verification failed.")
-
-    if verify_user("testuser", "password123"):
-        print("Test user verified successfully.")
-    else:
-        print("Test user verification failed.")
-
-    if verify_user("testuser", "wrongpassword"):
-        print("Test user with wrong password verified (ERROR).")
-    else:
-        print("Test user with wrong password verification failed (CORRECT).")
-
-    print(f"Role of 'admin': {get_user_role('admin')}")
-    print(f"Role of 'testuser': {get_user_role('testuser')}")
-
-    # Example of new functions
-    print("\n--- Testing new functions ---")
-    all_users = get_all_users()
-    print("All users:", all_users)
-
-    if all_users:
-        # Update a user
-        user_to_update_id = all_users[0]['id']
-        print(f"Updating user with ID {user_to_update_id}...")
-        success, msg = update_user(user_to_update_id, email="updated_admin@example.com")
-        print(f"Update result: {success}, {msg}")
-        print("User after update:", get_user_details(all_users[0]['username']))
-
-        # Delete a user
-        user_to_delete_id = all_users[0]['id']
-        print(f"Deleting user with ID {user_to_delete_id}...")
-        success, msg = delete_user(user_to_delete_id)
-        print(f"Delete result: {success}, {msg}")
-        print("All users after delete:", get_all_users())
-

@@ -3,7 +3,7 @@ from PySide6.QtCore import Qt, Signal
 import qtawesome as qta
 from src.components.validated_line_edit import ValidatedLineEdit
 
-from src.database import get_user_details, add_user, verify_user, get_user_role, get_all_users, update_user, delete_user # Assuming these are available for CRUD
+from src.db.user_queries import get_user_details, add_user, verify_user, get_user_role, get_all_users, update_user, delete_user # Assuming these are available for CRUD
 
 class UserManagement(QWidget):
     def __init__(self):

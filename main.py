@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog
 from src.app.layout import MainLayout
 from src.styles.theme_manager import ThemeManager
-from src.database import initialize_db, add_user
+from src.db.user_queries import initialize_db, add_user
 from src.auth_dialog import LoginDialog
 from src.user_manager import UserManager
 

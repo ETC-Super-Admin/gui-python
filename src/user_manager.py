@@ -1,6 +1,6 @@
 import PySide6.QtCore as QtCore
 from PySide6.QtWidgets import QApplication # Needed for primaryScreen
-from src.database import verify_user, get_user_details
+from src.db.user_queries import verify_user, get_user_details
 from enum import Enum
 from src.components.async_worker import Worker
 from PySide6.QtCore import QThreadPool

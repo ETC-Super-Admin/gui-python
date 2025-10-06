@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QLineEdit, QPushButton, QLabel, QMessageBox, QHBoxLayout, QCheckBox, QWidget
 from PySide6.QtCore import Signal, Qt
-from src.database import verify_user, get_user_role
+from src.db.user_queries import verify_user, get_user_role
 from src.register_dialog import RegisterDialog
 from src.components.validated_line_edit import ValidatedLineEdit
 

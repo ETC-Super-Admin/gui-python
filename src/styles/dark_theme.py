@@ -117,6 +117,34 @@ def get_dark_stylesheet():
             border: 2px solid {DARK_THEME["RING"]};
         }}
 
+        /* ComboBox */
+        QComboBox {{
+            background-color: {DARK_THEME["CARD"]};
+            color: {DARK_THEME["FOREGROUND"]};
+            border: 1px solid {DARK_THEME["INPUT"]};
+            border-radius: 6px;
+            padding-left: 10px;
+            min-height: 35px;
+        }}
+
+        QComboBox:focus {{
+            border: 2px solid {DARK_THEME["RING"]};
+        }}
+
+        QComboBox:disabled {{
+            background-color: {DARK_THEME["MUTED"]};
+            color: {DARK_THEME["MUTED_FOREGROUND"]};
+        }}
+
+        QComboBox QAbstractItemView {{
+            background-color: {DARK_THEME["BACKGROUND"]};
+            border: 1px solid {DARK_THEME["BORDER"]};
+            border-radius: 6px;
+            selection-background-color: {DARK_THEME["PRIMARY"]};
+            selection-color: {DARK_THEME["PRIMARY_FOREGROUND"]};
+            outline: 0px;
+        }}
+
         /* Labels */
         QLabel {{
             color: {DARK_THEME["FOREGROUND"]};

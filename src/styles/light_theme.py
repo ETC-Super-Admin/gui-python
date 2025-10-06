@@ -117,6 +117,34 @@ def get_light_stylesheet():
             border: 2px solid {LIGHT_THEME["RING"]};
         }}
 
+        /* ComboBox */
+        QComboBox {{
+            background-color: {LIGHT_THEME["BACKGROUND"]};
+            color: {LIGHT_THEME["FOREGROUND"]};
+            border: 1px solid {LIGHT_THEME["INPUT"]};
+            border-radius: 6px;
+            padding-left: 10px;
+            min-height: 35px;
+        }}
+
+        QComboBox:focus {{
+            border: 2px solid {LIGHT_THEME["RING"]};
+        }}
+        
+        QComboBox:disabled {{
+            background-color: {LIGHT_THEME["MUTED"]};
+            color: {LIGHT_THEME["MUTED_FOREGROUND"]};
+        }}
+
+        QComboBox QAbstractItemView {{
+            background-color: {LIGHT_THEME["CARD"]};
+            border: 1px solid {LIGHT_THEME["BORDER"]};
+            border-radius: 6px;
+            selection-background-color: {LIGHT_THEME["PRIMARY"]};
+            selection-color: {LIGHT_THEME["PRIMARY_FOREGROUND"]};
+            outline: 0px;
+        }}
+
         /* Labels */
         QLabel {{
             color: {LIGHT_THEME["FOREGROUND"]};
