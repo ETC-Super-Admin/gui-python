@@ -65,19 +65,19 @@ class Sidebar(QWidget):
             qta.icon('fa5s.tachometer-alt', color='#64748b'), 
             "Dashboard"
         )
-        self.analytics_button = create_nav_button(
-            qta.icon('fa5s.chart-line', color='#64748b'), 
-            "Analytics"
-        )
-        self.projects_button = create_nav_button(
-            qta.icon('fa5s.folder', color='#64748b'), 
-            "Projects"
-        )
+        # self.analytics_button = create_nav_button(
+        #     qta.icon('fa5s.chart-line', color='#64748b'), 
+        #     "Analytics"
+        # )
+        # self.projects_button = create_nav_button(
+        #     qta.icon('fa5s.folder', color='#64748b'), 
+        #     "Projects"
+        # )
 
-        self.help_button = create_nav_button(
-            qta.icon('fa5s.question-circle', color='#64748b'), 
-            "Help"
-        )
+        # self.help_button = create_nav_button(
+        #     qta.icon('fa5s.question-circle', color='#64748b'), 
+        #     "Help"
+        # )
 
         # Bills Process button with chevron
         self.bills_process_button, self.bills_process_icon_label, self.bills_process_chevron_label = create_expandable_button(
@@ -112,8 +112,8 @@ class Sidebar(QWidget):
         )
 
         nav_layout.addWidget(self.dashboard_button)
-        nav_layout.addWidget(self.analytics_button)
-        nav_layout.addWidget(self.projects_button)
+        # nav_layout.addWidget(self.analytics_button)
+        # nav_layout.addWidget(self.projects_button)
         nav_layout.addWidget(self.bills_process_button)
 
         # Bills Process submenu
@@ -128,7 +128,7 @@ class Sidebar(QWidget):
         nav_layout.addWidget(self.shipping_label_submenu)
         self.shipping_label_submenu.hide()
 
-        nav_layout.addWidget(self.help_button)
+        # nav_layout.addWidget(self.help_button)
         nav_layout.addWidget(self.admin_button)
 
         # Admin submenu
@@ -161,17 +161,17 @@ class Sidebar(QWidget):
 
         self.buttons = {
             "dashboard": self.dashboard_button,
-            "analytics": self.analytics_button,
-            "projects": self.projects_button,
+            # "analytics": self.analytics_button,
+            # "projects": self.projects_button,
             "bills_process": self.bills_process_submenu.overview_button,
             "cell_config": self.bills_process_submenu.cell_config_button,
             "path_config": self.bills_process_submenu.path_config_button,
             "shipping_label": self.shipping_label_submenu.overview_button,
-            "live_view": self.shipping_label_submenu.live_view_button,
+
             "label_asset": self.shipping_label_submenu.label_asset_button,
             "sender_management": self.shipping_label_submenu.sender_management_button,
             "receiver_management": self.shipping_label_submenu.receiver_management_button,
-            "help": self.help_button,
+            # "help": self.help_button,
             "settings": self.settings_button,
             "general_settings": self.settings_submenu.general_settings_button,
             "admin": self.admin_button,
@@ -181,9 +181,9 @@ class Sidebar(QWidget):
 
         # Connect signals
         self.dashboard_button.clicked.connect(lambda: self.on_button_clicked("dashboard"))
-        self.analytics_button.clicked.connect(lambda: self.on_button_clicked("analytics"))
-        self.projects_button.clicked.connect(lambda: self.on_button_clicked("projects"))
-        self.help_button.clicked.connect(lambda: self.on_button_clicked("help"))
+        # self.analytics_button.clicked.connect(lambda: self.on_button_clicked("analytics"))
+        # self.projects_button.clicked.connect(lambda: self.on_button_clicked("projects"))
+        # self.help_button.clicked.connect(lambda: self.on_button_clicked("help"))
 
         self.bills_process_submenu.sub_page_changed.connect(self.on_button_clicked)
         self.shipping_label_submenu.sub_page_changed.connect(self.on_button_clicked)
@@ -248,7 +248,7 @@ class Sidebar(QWidget):
         if button_name not in ["bills_process", "cell_config", "path_config"] and self.bills_process_expanded:
             self.toggle_bills_process_submenu()
 
-        if button_name not in ["shipping_label", "live_view", "label_asset", "sender_management", "receiver_management"] and self.shipping_label_expanded:
+        if button_name not in ["shipping_label", "label_asset", "sender_management", "receiver_management"] and self.shipping_label_expanded:
             self.toggle_shipping_label_submenu()
 
         # If a main expandable button is clicked, just toggle it
@@ -294,7 +294,7 @@ class Sidebar(QWidget):
                 "help": 'fa5s.question-circle',
                 "general_settings": 'fa5s.sliders-h', "user_management": 'fa5s.users', "timesheets": 'fa5s.clock',
                 "bills_process": 'fa5s.file-alt', "cell_config": 'fa5s.th', "path_config": 'fa5s.folder-open',
-                "shipping_label": 'fa5s.barcode', "live_view": 'fa5s.street-view', "label_asset": 'fa5s.box', "sender_management": 'fa5s.user-check', "receiver_management": 'fa5s.user-tag'
+                "shipping_label": 'fa5s.barcode', "label_asset": 'fa5s.box', "sender_management": 'fa5s.user-check', "receiver_management": 'fa5s.user-tag'
             }
             
             if name in icon_name_map:
@@ -314,6 +314,6 @@ class Sidebar(QWidget):
         update_expandable_button_state(self.bills_process_button, is_bills_active, self.theme_manager, self.bills_process_icon_label, self.bills_process_chevron_label, 'fa5s.file-invoice-dollar')
         if is_bills_active and not self.bills_process_expanded: self.toggle_bills_process_submenu()
 
-        is_shipping_active = button_name in ["shipping_label", "live_view", "label_asset", "sender_management", "receiver_management"]
+        is_shipping_active = button_name in ["shipping_label", "label_asset", "sender_management", "receiver_management"]
         update_expandable_button_state(self.shipping_label_button, is_shipping_active, self.theme_manager, self.shipping_label_icon_label, self.shipping_label_chevron_label, 'fa5s.shipping-fast')
         if is_shipping_active and not self.shipping_label_expanded: self.toggle_shipping_label_submenu()

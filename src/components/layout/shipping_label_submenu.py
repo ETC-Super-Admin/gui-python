@@ -23,14 +23,6 @@ class ShippingLabelSubMenu(QWidget):
         layout.addWidget(self.overview_button)
         self.overview_button.clicked.connect(lambda: self.sub_page_changed.emit("shipping_label"))
 
-        self.live_view_button = self.create_nav_button(
-            qta.icon('fa5s.street-view', color='#64748b'),
-            "Live View",
-            is_sub_button=True
-        )
-        layout.addWidget(self.live_view_button)
-        self.live_view_button.clicked.connect(lambda: self.sub_page_changed.emit("live_view"))
-
         self.label_asset_button = self.create_nav_button(
             qta.icon('fa5s.box', color='#64748b'),
             "Label Asset",
@@ -57,7 +49,6 @@ class ShippingLabelSubMenu(QWidget):
 
         self.sub_buttons = {
             "shipping_label": self.overview_button,
-            "live_view": self.live_view_button,
             "label_asset": self.label_asset_button,
             "sender_management": self.sender_management_button,
             "receiver_management": self.receiver_management_button,

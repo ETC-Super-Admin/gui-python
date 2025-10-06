@@ -8,7 +8,7 @@ def create_nav_button(icon, text, is_sub_button=False):
     button = QPushButton(icon, f"  {text}")
     button.setObjectName("SidebarButton")
     button.setCheckable(True)
-    button.setFixedHeight(45)
+    button.setFixedHeight(36)
     button.setCursor(Qt.PointingHandCursor)
     
     font = QFont()
@@ -26,7 +26,7 @@ def create_expandable_button(icon_name_str, text, toggle_function, theme_manager
     container = QWidget()
     container.setObjectName("SidebarButton")
     container.setCursor(Qt.PointingHandCursor)
-    container.setFixedHeight(45)
+    container.setFixedHeight(36)
     
     # Make container clickable
     container.mousePressEvent = lambda e: toggle_function()
