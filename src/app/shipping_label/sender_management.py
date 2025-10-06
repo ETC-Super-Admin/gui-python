@@ -4,11 +4,18 @@ from PySide6.QtWidgets import (
     QAbstractItemView, QComboBox, QTextEdit, QMessageBox
 )
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QKeySequence, QShortcut
 import qtawesome as qta
 
 # Database imports
-from src.db.sender_queries import initialize_sender_db, add_sender, get_all_senders, update_sender, delete_sender
+from src.db.sender_queries import (
+    initialize_sender_db, add_sender, get_all_senders, update_sender, 
+    delete_sender
+)
 from src.db.address_queries import get_provinces, get_districts, get_sub_districts, get_zipcode, get_addresses_by_zipcode
+from src.db.config_queries import get_config
+from src.db.path_config_queries import get_all_path_configs
+from src.components.validated_line_edit import ValidatedLineEdit
 
 class SenderManagement(QWidget):
     def __init__(self):
@@ -16,9 +23,16 @@ class SenderManagement(QWidget):
         self.current_sender_id = None
         initialize_sender_db()
         self.setup_ui()
-        self.load_senders_to_table()
+        self.load_senders_to_table() # This will also populate the dropdown
         self.initialize_address_dropdowns()
         self.show_add_form()
+
+    def showEvent(self, event):
+        """Override showEvent to refresh data when the widget is shown."""
+        super().showEvent(event)
+        if self.isVisible():
+            self.load_senders_to_table()
+
 
     def setup_ui(self):
         main_layout = QVBoxLayout(self)
@@ -39,9 +53,20 @@ class SenderManagement(QWidget):
         left_layout.setSpacing(10)
 
         table_header_layout = QHBoxLayout()
-        table_title = QLabel("All Senders")
-        table_title.setStyleSheet("font-size: 18px; font-weight: bold;")
-        table_header_layout.addWidget(table_title)
+        
+        self.filter_combo = QComboBox()
+        self.filter_combo.addItems([
+            "Search by Name", "Search by Tel.", "Search by Inventory", "Search by Province",
+            "Search by District", "Search by Sub-district", "Search by Post Code"
+        ])
+        self.filter_combo.currentTextChanged.connect(self.filter_table)
+        table_header_layout.addWidget(self.filter_combo)
+
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("Search table...")
+        self.search_input.textChanged.connect(self.filter_table)
+        table_header_layout.addWidget(self.search_input)
+
         table_header_layout.addStretch()
 
         self.add_button = QPushButton(qta.icon('fa5s.plus', color='white'), " Add Sender")
@@ -53,22 +78,32 @@ class SenderManagement(QWidget):
 
         self.sender_table = QTableWidget()
         self.sender_table.setObjectName("Card")
-        self.sender_table.setColumnCount(6)
-        self.sender_table.setHorizontalHeaderLabels(["ID", "Inventory", "Name", "Address", "Post Code", "Tel."])
+        self.sender_table.setAlternatingRowColors(True) # Enable striped rows
+        self.sender_table.setColumnCount(9)
+        self.sender_table.setHorizontalHeaderLabels([
+            "ID", "Inventory", "Name", "Address Details", "Sub-district",
+            "District", "Province", "Post Code", "Tel."
+        ])
         header = self.sender_table.horizontalHeader()
-        header.setSectionResizeMode(1, QHeaderView.ResizeToContents) # Inventory
-        header.setSectionResizeMode(2, QHeaderView.Interactive)       # Name
-        header.setSectionResizeMode(3, QHeaderView.Stretch)           # Address
-        header.setSectionResizeMode(4, QHeaderView.ResizeToContents) # Post Code
-        header.setSectionResizeMode(5, QHeaderView.Interactive)       # Tel.
+        header.setMinimumSectionSize(120)
 
-        self.sender_table.setColumnWidth(2, 180)
-        self.sender_table.setColumnWidth(5, 130)
+        # Set Name to stretch
+        header.setSectionResizeMode(2, QHeaderView.Stretch)
+        
+        # Set other columns to be interactive with default widths
+        for i in range(self.sender_table.columnCount()):
+            if i not in [0, 2]: # Skip ID and Name
+                header.setSectionResizeMode(i, QHeaderView.Interactive)
+        
+        self.sender_table.setColumnWidth(1, 120) # Inventory
+        self.sender_table.setColumnWidth(3, 250) # Address Details
+        self.sender_table.setColumnWidth(4, 150) # Sub-district
+        self.sender_table.setColumnWidth(5, 150) # District
+        self.sender_table.setColumnWidth(6, 150) # Province
+        self.sender_table.setColumnWidth(7, 100) # Post Code
+        self.sender_table.setColumnWidth(8, 120) # Tel
 
-        self.sender_table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.sender_table.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.sender_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.sender_table.setColumnHidden(0, True)
+        self.sender_table.setColumnHidden(0, True) # Hide ID column
         self.sender_table.itemSelectionChanged.connect(self.on_sender_selection_changed)
         left_layout.addWidget(self.sender_table)
 
@@ -84,11 +119,13 @@ class SenderManagement(QWidget):
         form_layout.setSpacing(10)
 
         self.inventory_combo = QComboBox()
-        self.inventory_combo.addItems(["BKK", "PHK"])
         form_layout.addRow("Inventory:", self.inventory_combo)
 
-        self.name_input = QLineEdit()
-        self.name_input.setPlaceholderText("Enter sender's name")
+        self.name_input = ValidatedLineEdit(
+            placeholder_text="Enter sender's name",
+            validation_func=lambda text: (len(text.strip()) >= 3, "Name must be at least 3 characters."),
+            validation_mode='on_demand'
+        )
         form_layout.addRow("Name:", self.name_input)
 
         # --- New Address Fields ---
@@ -110,13 +147,19 @@ class SenderManagement(QWidget):
         form_layout.addRow("District:", self.district_combo)
         form_layout.addRow("Sub-district:", self.sub_district_combo)
 
-        self.address_detail_input = QLineEdit()
-        self.address_detail_input.setPlaceholderText("House No., Street, etc.")
+        self.address_detail_input = ValidatedLineEdit(
+            placeholder_text="House No., Street, etc.",
+            validation_func=lambda text: (text.strip() != "", "Address details cannot be empty."),
+            validation_mode='on_demand'
+        )
         form_layout.addRow("Address Details:", self.address_detail_input)
         # --- End New Address Fields ---
 
-        self.tel_input = QLineEdit()
-        self.tel_input.setPlaceholderText("Enter tel. numbers, separated by commas")
+        self.tel_input = ValidatedLineEdit(
+            placeholder_text="Enter tel. numbers, separated by commas",
+            validation_func=lambda text: (text.strip() != "", "Tel. cannot be empty."),
+            validation_mode='on_demand'
+        )
         form_layout.addRow("Tel.:", self.tel_input)
 
         form_action_layout = QHBoxLayout()
@@ -144,6 +187,62 @@ class SenderManagement(QWidget):
         self.province_combo.currentTextChanged.connect(self.on_province_changed)
         self.district_combo.currentTextChanged.connect(self.on_district_changed)
         self.sub_district_combo.currentTextChanged.connect(self.on_sub_district_changed)
+
+        # --- Add Keyboard Shortcut for Saving ---
+        shortcut = QShortcut(QKeySequence("Shift+Return"), self)
+        shortcut.activated.connect(self.save_sender)
+
+    def filter_table(self):
+        filter_column_text = self.filter_combo.currentText()
+        search_text = self.search_input.text().lower()
+
+        column_map = {
+            "Search by Name": 2,
+            "Search by Tel.": 8,
+            "Search by Inventory": 1,
+            "Search by Province": 6,
+            "Search by District": 5,
+            "Search by Sub-district": 4,
+            "Search by Post Code": 7
+        }
+        filter_column_index = column_map.get(filter_column_text)
+
+        if filter_column_index is None:
+            return
+
+        for row in range(self.sender_table.rowCount()):
+            item = self.sender_table.item(row, filter_column_index)
+            if item:
+                cell_text = item.text().lower()
+                match = search_text in cell_text
+                self.sender_table.setRowHidden(row, not match)
+            else:
+                self.sender_table.setRowHidden(row, True)
+
+    def populate_inventory_dropdown(self):
+        """
+        Fetches inventory codes from the central path configurations, populates the dropdown, 
+        and sets the default value.
+        """
+        self.inventory_combo.blockSignals(True)
+        self.inventory_combo.clear()
+        
+        path_configs = get_all_path_configs()
+        codes = sorted([config['inventory_code'] for config in path_configs])
+        
+        default_code = get_config("bills_process_inventory_code")
+        
+        if default_code and default_code not in codes:
+            codes.append(default_code)
+            codes.sort()
+
+        if codes:
+            self.inventory_combo.addItems(codes)
+        
+        if default_code and default_code in codes:
+            self.inventory_combo.setCurrentText(default_code)
+
+        self.inventory_combo.blockSignals(False)
 
     def initialize_address_dropdowns(self):
         self.province_combo.blockSignals(True)
@@ -210,33 +309,27 @@ class SenderManagement(QWidget):
             QMessageBox.information(self, "Not Found", f"No address data found for postcode {zipcode}.")
             return
 
-        # Block signals to prevent cascading updates
         self.province_combo.blockSignals(True)
         self.district_combo.blockSignals(True)
         self.sub_district_combo.blockSignals(True)
 
-        # A single postcode almost always belongs to a single province.
         province = results[0]['province']
         self.province_combo.setCurrentText(province)
 
-        # Repopulate districts for the found province
         districts = sorted(list(set(row['district'] for row in results)))
         self.district_combo.clear()
         self.district_combo.addItems(districts)
         self.district_combo.setEnabled(True)
 
-        # Repopulate sub-districts for the found province and first district
         sub_districts = sorted(list(set(row['sub_district'] for row in results)))
         self.sub_district_combo.clear()
         self.sub_district_combo.addItems(sub_districts)
         self.sub_district_combo.setEnabled(True)
 
-        # Unblock signals
         self.province_combo.blockSignals(False)
         self.district_combo.blockSignals(False)
         self.sub_district_combo.blockSignals(False)
 
-        # If only one result, select it all
         if len(districts) == 1:
             self.district_combo.setCurrentText(districts[0])
         if len(sub_districts) == 1:
@@ -251,9 +344,16 @@ class SenderManagement(QWidget):
             self.sender_table.setItem(row_position, 0, QTableWidgetItem(str(sender["id"])))
             self.sender_table.setItem(row_position, 1, QTableWidgetItem(sender["inventory_code"]))
             self.sender_table.setItem(row_position, 2, QTableWidgetItem(sender["name"]))
-            self.sender_table.setItem(row_position, 3, QTableWidgetItem(sender["address"])) 
-            self.sender_table.setItem(row_position, 4, QTableWidgetItem(sender["post_code"]))
-            self.sender_table.setItem(row_position, 5, QTableWidgetItem(sender["tel"]))
+            self.sender_table.setItem(row_position, 3, QTableWidgetItem(sender.get("address_detail", "")))
+            self.sender_table.setItem(row_position, 4, QTableWidgetItem(sender.get("sub_district", "")))
+            self.sender_table.setItem(row_position, 5, QTableWidgetItem(sender.get("district", "")))
+            self.sender_table.setItem(row_position, 6, QTableWidgetItem(sender.get("province", "")))
+            self.sender_table.setItem(row_position, 7, QTableWidgetItem(sender["post_code"]))
+            self.sender_table.setItem(row_position, 8, QTableWidgetItem(sender["tel"]))
+        
+        self.populate_inventory_dropdown()
+        if self.search_input:
+            self.search_input.clear()
 
     def on_sender_selection_changed(self):
         if self.sender_table.selectedItems():
@@ -267,7 +367,13 @@ class SenderManagement(QWidget):
         self.name_input.clear()
         self.address_detail_input.clear()
         self.tel_input.clear()
-        self.inventory_combo.setCurrentIndex(0)
+        
+        default_code = get_config("bills_process_inventory_code")
+        if default_code:
+            self.inventory_combo.setCurrentText(default_code)
+        else:
+            self.inventory_combo.setCurrentIndex(-1)
+
         self.initialize_address_dropdowns()
         self.postcode_input.clear()
         self.name_input.setFocus()
@@ -281,13 +387,46 @@ class SenderManagement(QWidget):
         
         self.form_groupbox.setTitle("Edit Sender")
         self.inventory_combo.setCurrentText(self.sender_table.item(selected_row, 1).text())
-        self.name_input.setText(self.sender_table.item(selected_row, 2).text())
-        self.tel_input.setText(self.sender_table.item(selected_row, 5).text())
+        self.name_input.line_edit.setText(self.sender_table.item(selected_row, 2).text())
         
+        address_detail = self.sender_table.item(selected_row, 3).text()
+        sub_district = self.sender_table.item(selected_row, 4).text()
+        district = self.sender_table.item(selected_row, 5).text()
+        province = self.sender_table.item(selected_row, 6).text()
+        post_code = self.sender_table.item(selected_row, 7).text()
+        tel = self.sender_table.item(selected_row, 8).text()
+
+        self.tel_input.line_edit.setText(tel)
+        self.address_detail_input.line_edit.setText(address_detail)
+        self.postcode_input.setText(post_code)
+
+        self.province_combo.blockSignals(True)
+        self.district_combo.blockSignals(True)
+        self.sub_district_combo.blockSignals(True)
+
         self.initialize_address_dropdowns()
-        self.address_detail_input.setText(self.sender_table.item(selected_row, 3).text())
-        self.postcode_input.setText(self.sender_table.item(selected_row, 4).text())
-        
+        self.province_combo.setCurrentText(province)
+
+        self.district_combo.clear()
+        if province:
+            districts = get_districts(province)
+            if districts:
+                self.district_combo.addItems(districts)
+                self.district_combo.setEnabled(True)
+        self.district_combo.setCurrentText(district)
+
+        self.sub_district_combo.clear()
+        if province and district:
+            sub_districts = get_sub_districts(province, district)
+            if sub_districts:
+                self.sub_district_combo.addItems(sub_districts)
+                self.sub_district_combo.setEnabled(True)
+        self.sub_district_combo.setCurrentText(sub_district)
+
+        self.province_combo.blockSignals(False)
+        self.district_combo.blockSignals(False)
+        self.sub_district_combo.blockSignals(False)
+
         self.delete_button.setVisible(True)
 
     def delete_selected_sender(self):
@@ -307,6 +446,10 @@ class SenderManagement(QWidget):
                 QMessageBox.warning(self, "Error", message)
 
     def save_sender(self):
+        self.name_input._validate_input()
+        self.address_detail_input._validate_input()
+        self.tel_input._validate_input()
+
         inventory = self.inventory_combo.currentText()
         name = self.name_input.text()
         tel = self.tel_input.text()
@@ -319,16 +462,32 @@ class SenderManagement(QWidget):
 
         is_address_filled = not any(s.startswith('Select') for s in [province, district, sub_district])
 
-        if not all([inventory, name, tel, address_detail, post_code, is_address_filled]):
-            QMessageBox.warning(self, "Input Error", "Please fill in all fields, including a full address.")
+        if not all([
+            self.name_input.isValid(),
+            self.address_detail_input.isValid(),
+            self.tel_input.isValid(),
+            inventory,
+            post_code,
+            is_address_filled
+        ]):
+            self.name_input.show_error_if_invalid()
+            self.address_detail_input.show_error_if_invalid()
+            self.tel_input.show_error_if_invalid()
+            QMessageBox.warning(self, "Input Error", "Please fill in all fields correctly and ensure they are valid.")
             return
 
-        full_address = f"{address_detail}, {sub_district}, {district}, {province}"
-
         if self.current_sender_id is None:
-            success, message = add_sender(inventory, name, full_address, post_code, tel)
+            success, message = add_sender(
+                inventory_code=inventory, name=name, address_detail=address_detail,
+                sub_district=sub_district, district=district, province=province,
+                post_code=post_code, tel=tel
+            )
         else:
-            success, message = update_sender(self.current_sender_id, inventory, name, full_address, post_code, tel)
+            success, message = update_sender(
+                sender_id=self.current_sender_id, inventory_code=inventory, name=name,
+                address_detail=address_detail, sub_district=sub_district, district=district,
+                province=province, post_code=post_code, tel=tel
+            )
 
         if success:
             QMessageBox.information(self, "Success", message)

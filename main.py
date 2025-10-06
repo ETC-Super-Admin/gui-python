@@ -14,7 +14,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.user_manager = user_manager
         self.setWindowTitle(f"ProAuto - {self.user_manager.get_username()} ({self.user_manager.get_user_role()})")
-        self.setGeometry(100, 100, 1400, 800)
+        self.setGeometry(100, 100, 1400, 860)
 
         self.main_layout_widget = MainLayout(theme_manager, self.user_manager.get_username(), self.user_manager.get_user_role())
         self.main_layout_widget.navbar.logout_requested.connect(self.user_manager.logout)

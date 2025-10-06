@@ -47,9 +47,18 @@ class ShippingLabelSubMenu(QWidget):
         layout.addWidget(self.receiver_management_button)
         self.receiver_management_button.clicked.connect(lambda: self.sub_page_changed.emit("receiver_management"))
 
+        self.delivery_management_button = self.create_nav_button(
+            qta.icon('fa5s.truck', color='#64748b'),
+            "Delivery Management",
+            is_sub_button=True
+        )
+        layout.addWidget(self.delivery_management_button)
+        self.delivery_management_button.clicked.connect(lambda: self.sub_page_changed.emit("delivery_management"))
+
         self.sub_buttons = {
             "shipping_label": self.overview_button,
             "label_asset": self.label_asset_button,
             "sender_management": self.sender_management_button,
             "receiver_management": self.receiver_management_button,
+            "delivery_management": self.delivery_management_button,
         }

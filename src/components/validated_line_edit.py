@@ -4,10 +4,12 @@ from PySide6.QtCore import Signal, Qt
 class ValidatedLineEdit(QWidget):
     validation_changed = Signal(bool)
 
-    def __init__(self, placeholder_text="", validation_func=None, echo_mode=QLineEdit.Normal, toggle_button=None, parent=None):
+    def __init__(self, placeholder_text="", validation_func=None, echo_mode=QLineEdit.Normal, toggle_button=None, validation_mode='realtime', parent=None):
         super().__init__(parent)
         self.validation_func = validation_func
+        self.validation_mode = validation_mode
         self.is_valid = False
+        self.error_message = ""
 
         self.main_layout = QVBoxLayout(self)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
@@ -45,18 +47,30 @@ class ValidatedLineEdit(QWidget):
         if self.validation_func:
             is_valid, error_message = self.validation_func(text)
             self.is_valid = is_valid
-            if not is_valid:
-                self.error_label.setText(error_message)
-                self.error_label.show()
-                self.line_edit.setStyleSheet("border: 1px solid #ef4444;") # Red border
-            else:
-                self.error_label.hide()
-                self.line_edit.setStyleSheet("") # Reset border
+            self.error_message = error_message
         else:
             self.is_valid = True
+            self.error_message = ""
+        
+        self.validation_changed.emit(self.is_valid)
+
+        # In realtime mode, always show feedback.
+        # In on_demand mode, only hide the error if the input becomes valid.
+        if self.validation_mode == 'realtime':
+            self.show_error_if_invalid()
+        elif self.is_valid:
             self.error_label.hide()
             self.line_edit.setStyleSheet("")
-        self.validation_changed.emit(self.is_valid)
+
+    def show_error_if_invalid(self):
+        """Shows or hides the error indicator based on the current validity."""
+        if not self.is_valid:
+            self.error_label.setText(self.error_message)
+            self.error_label.show()
+            self.line_edit.setStyleSheet("border: 1px solid #ef4444;") # Red border
+        else:
+            self.error_label.hide()
+            self.line_edit.setStyleSheet("") # Reset border
 
     def text(self):
         return self.line_edit.text()
@@ -79,6 +93,10 @@ class ValidatedLineEdit(QWidget):
 
     def clear(self):
         self.line_edit.clear()
+        # After clearing, re-validate (which will set to invalid) but hide the error indicator
+        self._validate_input("")
+        self.error_label.hide()
+        self.line_edit.setStyleSheet("")
 
     def setFocus(self):
         self.line_edit.setFocus()

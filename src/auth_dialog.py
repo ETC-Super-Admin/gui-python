@@ -41,9 +41,14 @@ class LoginDialog(QDialog):
                 return False, "Password must be at least 6 characters."
             return True, ""
 
-        self.username_input = ValidatedLineEdit(placeholder_text="Username", validation_func=validate_username)
+        self.username_input = ValidatedLineEdit(
+            placeholder_text="Username", 
+            validation_func=validate_username,
+            validation_mode='on_demand'
+        )
         self.username_input.setObjectName("LoginInput")
         self.username_input.line_edit.returnPressed.connect(self._on_return_pressed)
+        self.username_input.validation_changed.connect(self._check_form_validity)
         main_layout.addWidget(self.username_input)
 
         self.toggle_password_visibility_button = QPushButton("Show")
@@ -52,18 +57,24 @@ class LoginDialog(QDialog):
         self.toggle_password_visibility_button.setFixedSize(60, 35) # Wider button
         self.toggle_password_visibility_button.clicked.connect(self._toggle_password_visibility)
 
-        self.password_input = ValidatedLineEdit(placeholder_text="Password", validation_func=validate_password, echo_mode=QLineEdit.Password, toggle_button=self.toggle_password_visibility_button)
+        self.password_input = ValidatedLineEdit(
+            placeholder_text="Password", 
+            validation_func=validate_password, 
+            echo_mode=QLineEdit.Password, 
+            toggle_button=self.toggle_password_visibility_button,
+            validation_mode='on_demand'
+        )
         self.password_input.setObjectName("LoginInput")
         self.password_input.line_edit.returnPressed.connect(self._on_return_pressed)
-        main_layout.addWidget(self.password_input)
         self.password_input.validation_changed.connect(self._check_form_validity)
+        main_layout.addWidget(self.password_input)
         
         options_layout = QHBoxLayout()
         self.remember_me_checkbox = QCheckBox("Remember me")
         self.remember_me_checkbox.setObjectName("LoginCheckbox")
         options_layout.addWidget(self.remember_me_checkbox)
         options_layout.addStretch()
-        forgot_password_link = QLabel("<a href=\"#\">Forgot password?</a>")
+        forgot_password_link = QLabel('<a href="#">Forgot password?</a>')
         forgot_password_link.setObjectName("LoginLink")
         forgot_password_link.linkActivated.connect(self._forgot_password)
         options_layout.addWidget(forgot_password_link)
@@ -116,6 +127,19 @@ class LoginDialog(QDialog):
             pass
 
     def attempt_login(self):
+        # Force re-validation to get the latest state
+        self.username_input._validate_input()
+        self.password_input._validate_input()
+
+        # Check validity
+        is_valid = self.username_input.isValid() and self.password_input.isValid()
+
+        if not is_valid:
+            # Show errors and stop
+            self.username_input.show_error_if_invalid()
+            self.password_input.show_error_if_invalid()
+            return
+
         username = self.username_input.text()
         password = self.password_input.text()
         remember_me = self.remember_me_checkbox.isChecked()
@@ -141,7 +165,8 @@ class LoginDialog(QDialog):
                 error_message = "Server error. Please try again later."
             
             QMessageBox.warning(self, "Login Failed", error_message)
-            self.login_button.setEnabled(True)
+            # Re-enable the button after a failed attempt
+            self._check_form_validity()
             self.login_button.setText("Login")
 
     def done(self, result):

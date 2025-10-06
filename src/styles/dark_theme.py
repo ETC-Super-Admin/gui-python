@@ -408,6 +408,15 @@ def get_dark_stylesheet():
             background-color: #d97706; /* Tailwind amber-600 */
         }}
 
+        #ExportButton {{
+            background-color: {DARK_THEME["PRIMARY"]}; 
+            color: {DARK_THEME["PRIMARY_FOREGROUND"]};
+        }}
+        #ExportButton:hover {{
+            background-color: {DARK_THEME["RING"]}; 
+        }}
+
+
         #DeleteUserButton {{
             background-color: #ef4444; /* Tailwind red-500 */
             color: {DARK_THEME["PRIMARY_FOREGROUND"]};

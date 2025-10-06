@@ -18,6 +18,7 @@ from src.app.shipping_label.shipping_label import ShippingLabel
 from src.app.shipping_label.label_asset import LabelAsset
 from src.app.shipping_label.sender_management import SenderManagement
 from src.app.shipping_label.receiver_management import ReceiverManagement
+from src.app.shipping_label.delivery_management import DeliveryManagement
 from src.app.admin.admin import Admin
 from src.app.admin.timesheets import Timesheets
 from src.app.access_denied import AccessDenied
@@ -33,8 +34,8 @@ class MainLayout(QWidget):
         self.user_manager = UserManager()
 
         self.permission_matrix = {
-            "admin": ["dashboard", "analytics", "projects", "settings", "general_settings", "user_management", "profile", "help", "bills_process", "cell_config", "path_config", "shipping_label", "label_asset", "sender_management", "receiver_management", "admin", "timesheets"],
-            "user": ["dashboard", "analytics", "projects", "settings", "general_settings", "profile", "help", "bills_process", "cell_config", "path_config", "shipping_label", "label_asset", "sender_management", "receiver_management"],
+            "admin": ["dashboard", "analytics", "projects", "settings", "general_settings", "user_management", "profile", "help", "bills_process", "cell_config", "path_config", "shipping_label", "label_asset", "sender_management", "receiver_management", "delivery_management", "admin", "timesheets"],
+            "user": ["dashboard", "analytics", "projects", "settings", "general_settings", "profile", "help", "bills_process", "cell_config", "path_config", "shipping_label", "label_asset", "sender_management", "receiver_management", "delivery_management"],
         }
 
         main_layout = QHBoxLayout(self)
@@ -82,6 +83,7 @@ class MainLayout(QWidget):
             "label_asset": LabelAsset(),
             "sender_management": SenderManagement(),
             "receiver_management": ReceiverManagement(),
+            "delivery_management": DeliveryManagement(),
             "admin": Admin(),
             "timesheets": Timesheets(),
             "access_denied": AccessDenied(),

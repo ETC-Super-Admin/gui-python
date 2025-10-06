@@ -427,6 +427,15 @@ def get_light_stylesheet():
             background-color: #d97706; /* Tailwind amber-600 */
         }}
 
+        #ExportButton {{
+            background-color: {LIGHT_THEME["PRIMARY"]}; 
+            color: {LIGHT_THEME["PRIMARY_FOREGROUND"]};
+        }}
+        #ExportButton:hover {{
+            background-color: {LIGHT_THEME["RING"]}; 
+        }}
+
+
         #DeleteUserButton {{
             background-color: #ef4444; /* Tailwind red-500 */
             color: {LIGHT_THEME["PRIMARY_FOREGROUND"]};
