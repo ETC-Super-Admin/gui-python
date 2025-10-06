@@ -55,7 +55,16 @@ class SenderManagement(QWidget):
         self.sender_table.setObjectName("Card")
         self.sender_table.setColumnCount(6)
         self.sender_table.setHorizontalHeaderLabels(["ID", "Inventory", "Name", "Address", "Post Code", "Tel."])
-        self.sender_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        header = self.sender_table.horizontalHeader()
+        header.setSectionResizeMode(1, QHeaderView.ResizeToContents) # Inventory
+        header.setSectionResizeMode(2, QHeaderView.Interactive)       # Name
+        header.setSectionResizeMode(3, QHeaderView.Stretch)           # Address
+        header.setSectionResizeMode(4, QHeaderView.ResizeToContents) # Post Code
+        header.setSectionResizeMode(5, QHeaderView.Interactive)       # Tel.
+
+        self.sender_table.setColumnWidth(2, 180)
+        self.sender_table.setColumnWidth(5, 130)
+
         self.sender_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.sender_table.setSelectionMode(QAbstractItemView.SingleSelection)
         self.sender_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
