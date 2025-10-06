@@ -12,7 +12,6 @@ from src.user_manager import UserManager
 class MainWindow(QMainWindow):
     def __init__(self, theme_manager, user_manager):
         super().__init__()
-        self._is_handling_close = False
         self.user_manager = user_manager
         self.setWindowTitle(f"ProAuto - {self.user_manager.get_username()} ({self.user_manager.get_user_role()})")
         self.setGeometry(100, 100, 1400, 800)
@@ -32,20 +31,17 @@ class MainWindow(QMainWindow):
             self.main_layout_widget.switch_page(self.user_manager.intended_destination)
             self.user_manager.intended_destination = None
 
-    def closeEvent(self, event):
-        if self._is_handling_close:
-            event.accept()
-            return
-
-        self._is_handling_close = True
-        self.user_manager.logout() # This will trigger self.close() via the signal
-        event.accept() # Accept the original close event
-
 def main():
     app = QApplication(sys.argv)
     load_dotenv()
     initialize_db()
 
+    # Create managers
+    user_manager = UserManager()
+    theme_manager = ThemeManager(app)
+    theme_manager.set_light_theme() # Default to light theme
+
+    # Seed admin user from .env if available
     admin_username = os.getenv("ADMIN_USERNAME")
     admin_password = os.getenv("ADMIN_PASSWORD")
     if admin_username and admin_password:
@@ -55,29 +51,25 @@ def main():
         elif "already exists" in message:
             print(f"Admin user '{admin_username}' already exists in the database.")
 
-    user_manager = UserManager()
-    theme_manager = ThemeManager(app)
-    theme_manager.set_light_theme()
-
-    while True:
-        # If user is not logged in (or has just logged out), show login dialog.
-        if not user_manager.is_logged_in():
-            login_dialog = LoginDialog(user_manager=user_manager)
-            if login_dialog.exec() != QDialog.Accepted:
-                # User cancelled login, so exit the application loop.
-                break
+    # Check if a session is already active
+    if not user_manager.is_logged_in():
+        # If not logged in, show the login dialog
+        login_dialog = LoginDialog(user_manager=user_manager)
+        if login_dialog.exec() != QDialog.Accepted:
+            # If the user cancels the login, exit the application
+            sys.exit(0)
         
-        # If login was successful, proceed to show the main window.
-        if user_manager.is_logged_in():
-            main_window = MainWindow(theme_manager, user_manager)
-            main_window.show()
-            app.exec() # This will block until MainWindow is closed (on logout).
-            # After window is closed, the loop continues, and the user will be logged out.
-        else:
-            # This case is reached if the very first login is cancelled.
-            break
-
-    sys.exit(0)
+        # Process pending events to ensure the user state is updated from the login thread
+        QApplication.processEvents()
+    
+    # If we reach here, the user is successfully logged in (either from a saved session or the dialog)
+    if user_manager.is_logged_in():
+        main_window = MainWindow(theme_manager, user_manager)
+        main_window.show()
+        sys.exit(app.exec()) # Start the event loop and exit when it's done
+    else:
+        # This case handles if the login was cancelled initially.
+        sys.exit(0)
 
 
 if __name__ == "__main__":

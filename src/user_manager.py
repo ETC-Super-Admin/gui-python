@@ -100,6 +100,7 @@ class UserManager(QtCore.QObject):
                         self.settings.setValue("session/token_expires_at", self._current_user["token_expires_at"].toString(QtCore.Qt.ISODate))
                         # Store timestamp for session expiration
                         self.settings.setValue("session/timestamp", QtCore.QDateTime.currentDateTime().toString(QtCore.Qt.ISODate))
+                        self.settings.sync()
                     else:
                         self.settings.remove("session/username")
                         self.settings.remove("session/token")
