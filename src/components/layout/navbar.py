@@ -57,7 +57,6 @@ class DropdownMenu(QFrame):
     logout_clicked = Signal()
     profile_clicked = Signal()
     settings_clicked = Signal()
-    switch_account_clicked = Signal() # New signal
     
     def __init__(self, user_info, parent=None):
         super().__init__(parent)
@@ -110,9 +109,6 @@ class DropdownMenu(QFrame):
         self.settings_btn.clicked.connect(self.settings_clicked)
         layout.addWidget(self.settings_btn)
 
-        self.switch_account_btn = self.create_menu_item("fa5s.exchange-alt", "Switch Account")
-        self.switch_account_btn.clicked.connect(self.switch_account_clicked)
-        layout.addWidget(self.switch_account_btn)
         
         # Another separator
         separator2 = QFrame()
@@ -138,7 +134,6 @@ class Navbar(QWidget):
     logout_requested = Signal()
     profile_requested = Signal()
     settings_requested = Signal()
-    switch_account_requested = Signal() # New signal
 
     def __init__(self, theme_manager, username, role):
         super().__init__()
@@ -222,7 +217,6 @@ class Navbar(QWidget):
             self.dropdown_menu.logout_clicked.connect(self.on_logout_clicked)
             self.dropdown_menu.profile_clicked.connect(self.on_profile_clicked)
             self.dropdown_menu.settings_clicked.connect(self.on_settings_clicked)
-            self.dropdown_menu.switch_account_clicked.connect(self.on_switch_account_clicked)
         
         # Position dropdown below avatar
         pos = self.avatar.mapToGlobal(QPoint(0, 0))
@@ -261,13 +255,6 @@ class Navbar(QWidget):
             self.dropdown_menu.hide()
             self.dropdown_visible = False
         self.settings_requested.emit()
-
-    def on_switch_account_clicked(self):
-        """Handle switch account click"""
-        if self.dropdown_menu:
-            self.dropdown_menu.hide()
-            self.dropdown_visible = False
-        self.switch_account_requested.emit()
     
     def set_user_info(self, name, email, initials=None):
         """Update user information displayed in navbar and dropdown"""

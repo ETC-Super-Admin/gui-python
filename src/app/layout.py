@@ -94,7 +94,6 @@ class MainLayout(QWidget):
         self.navbar.sidebar_toggled.connect(self.toggle_sidebar)
         self.navbar.profile_requested.connect(lambda: self.switch_page("profile"))
         self.navbar.settings_requested.connect(lambda: self.switch_page("settings"))
-        self.navbar.switch_account_requested.connect(self._handle_switch_account)
 
         last_active_page = self.user_manager.get_last_active_page()
         self.switch_page(last_active_page)
@@ -120,9 +119,6 @@ class MainLayout(QWidget):
             self.sidebar_animation.setEndValue(300)
         self.sidebar_animation.start()
         self.navbar.update_sidebar_toggle_icon(not is_expanded)
-
-    def _handle_switch_account(self):
-        self.user_manager.logout()
 
     def switch_page(self, page_name):
         if page_name not in self.pages:
