@@ -1,21 +1,21 @@
 /* QTableWidget */
 QTableWidget {{
-    background-color: {{CARD}};
-    border: 1px solid {{BORDER}};
+    background-color: {CARD};
+    border: 1px solid {BORDER};
     border-radius: 8px;
-    selection-background-color: {{PRIMARY}};
-    selection-color: {{PRIMARY_FOREGROUND}};
-    gridline-color: {{BORDER}};
+    selection-background-color: {PRIMARY};
+    selection-color: {PRIMARY_FOREGROUND};
+    gridline-color: {BORDER};
     outline: none;
 }}
 
 QTableWidget::item {{
     padding: 8px;
-    color: {{FOREGROUND}};
+    color: {FOREGROUND};
 }}
 
 QTableWidget::item:alternate {{
-    background-color: {{SECONDARY}};
+    background-color: {SECONDARY};
 }}
 
 QTableWidget::item:selected {{

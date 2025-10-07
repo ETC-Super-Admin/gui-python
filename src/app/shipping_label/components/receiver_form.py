@@ -13,16 +13,15 @@ from src.components.validated_line_edit import ValidatedLineEdit
 
 class ReceiverForm(QWidget):
     """
-    A form widget for creating and editing receiver details.
-    Handles UI, validation, and address lookup.
+    A form widget for creating and editing a single receiver address.
     """
-    save_requested = Signal(dict)      # Emits receiver data
-    delete_requested = Signal(int)      # Emits receiver ID
+    save_requested = Signal(dict)
+    delete_requested = Signal(int) # Emit address_id to be deleted
     cancel_requested = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.current_receiver_id = None
+        self.current_address_id = None
         self.setup_ui()
         self.initialize_address_dropdowns()
         self.populate_delivery_dropdown()
@@ -33,7 +32,7 @@ class ReceiverForm(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(15)
 
-        self.form_groupbox = QGroupBox("Manage Receiver")
+        self.form_groupbox = QGroupBox("Manage Address")
         self.form_groupbox.setObjectName("Card")
         form_layout = QFormLayout(self.form_groupbox)
         form_layout.setSpacing(10)
@@ -41,9 +40,6 @@ class ReceiverForm(QWidget):
         # --- Form Fields ---
         self.inventory_combo = QComboBox()
         form_layout.addRow("Inventory:", self.inventory_combo)
-
-        self.name_input = self._create_validated_line_edit("Enter receiver's name", lambda text: (len(text.strip()) >= 3, "Name must be at least 3 characters."))
-        form_layout.addRow("Name:", self.name_input)
 
         postcode_layout = self._create_postcode_lookup()
         form_layout.addRow("Post Code Lookup:", postcode_layout)
@@ -57,9 +53,6 @@ class ReceiverForm(QWidget):
 
         self.address_detail_input = self._create_validated_line_edit("House No., Street, etc.", lambda text: (text.strip() != "", "Address details cannot be empty."))
         form_layout.addRow("Address Details:", self.address_detail_input)
-
-        self.tel_input = self._create_validated_line_edit("Enter tel. numbers, separated by commas", lambda text: (text.strip() != "", "Tel. cannot be empty."))
-        form_layout.addRow("Tel.:", self.tel_input)
 
         self.delivery_by_combo = QComboBox()
         form_layout.addRow("Delivery By:", self.delivery_by_combo)
@@ -104,15 +97,15 @@ class ReceiverForm(QWidget):
         self.cancel_button.setObjectName("CancelFormButton")
         self.cancel_button.clicked.connect(self.cancel_requested.emit)
 
-        self.save_button = QPushButton(qta.icon('fa5s.save', color='white'), " Save")
-        self.save_button.setObjectName("SaveUserButton")
-        self.save_button.clicked.connect(self.save_receiver)
-        
         self.delete_button = QPushButton(qta.icon('fa5s.trash-alt', color='white'), " Delete")
         self.delete_button.setObjectName("DeleteUserButton")
-        self.delete_button.clicked.connect(lambda: self.delete_requested.emit(self.current_receiver_id))
-        self.delete_button.setVisible(False)
+        self.delete_button.clicked.connect(lambda: self.delete_requested.emit(self.current_address_id))
+        self.delete_button.setVisible(False) # Hidden by default
 
+        self.save_button = QPushButton(qta.icon('fa5s.save', color='white'), " Save")
+        self.save_button.setObjectName("SaveUserButton")
+        self.save_button.clicked.connect(self.save_address)
+        
         form_action_layout.addStretch()
         form_action_layout.addWidget(self.cancel_button)
         form_action_layout.addWidget(self.delete_button)
@@ -212,7 +205,6 @@ class ReceiverForm(QWidget):
             QMessageBox.information(self, "Not Found", f"No address data found for postcode {zipcode}.")
             return
         
-        # Block signals to prevent cascading updates while we set the values
         self.province_combo.blockSignals(True)
         self.district_combo.blockSignals(True)
         self.sub_district_combo.blockSignals(True)
@@ -226,7 +218,6 @@ class ReceiverForm(QWidget):
         sub_districts = sorted(list(set(row['sub_district'] for row in results)))
         self.sub_district_combo.clear(); self.sub_district_combo.addItems(sub_districts); self.sub_district_combo.setEnabled(True)
 
-        # Unblock signals
         self.province_combo.blockSignals(False)
         self.district_combo.blockSignals(False)
         self.sub_district_combo.blockSignals(False)
@@ -236,12 +227,10 @@ class ReceiverForm(QWidget):
 
     # --- Public Methods ---
     def set_add_mode(self):
-        self.current_receiver_id = None
-        self.form_groupbox.setTitle("Add New Receiver")
+        self.current_address_id = None
+        self.form_groupbox.setTitle("Add New Address")
         self.delete_button.setVisible(False)
-        self.name_input.clear()
         self.address_detail_input.clear()
-        self.tel_input.clear()
         self.zone_input.clear()
         
         default_code = get_config("bills_process_inventory_code")
@@ -252,32 +241,29 @@ class ReceiverForm(QWidget):
 
         self.initialize_address_dropdowns()
         self.postcode_input.clear()
-        self.name_input.setFocus()
+        self.address_detail_input.setFocus()
         self.show()
 
-    def set_edit_mode(self, receiver_data):
-        self.current_receiver_id = receiver_data["id"]
-        self.form_groupbox.setTitle(f'Edit Receiver: {receiver_data["name"]}')
+    def set_edit_mode(self, address_data):
+        self.current_address_id = address_data["id"]
+        self.form_groupbox.setTitle(f'Edit Address')
+        self.delete_button.setVisible(True)
 
-        # Block signals during population
         self.province_combo.blockSignals(True)
         self.district_combo.blockSignals(True)
         self.sub_district_combo.blockSignals(True)
 
-        self.inventory_combo.setCurrentText(receiver_data.get("inventory_code", ""))
-        self.name_input.line_edit.setText(receiver_data.get("name", ""))
-        self.address_detail_input.line_edit.setText(receiver_data.get("address_detail", ""))
-        self.tel_input.line_edit.setText(receiver_data.get("tel", ""))
-        self.postcode_input.setText(receiver_data.get("post_code", ""))
-        self.delivery_by_combo.setCurrentText(receiver_data.get("delivery_by", ""))
-        self.zone_input.setText(receiver_data.get("zone", "")) # Safely get zone
+        self.inventory_combo.setCurrentText(address_data.get("inventory_code", ""))
+        self.address_detail_input.line_edit.setText(address_data.get("address_detail", ""))
+        self.postcode_input.setText(address_data.get("post_code", ""))
+        self.delivery_by_combo.setCurrentText(address_data.get("delivery_by", ""))
+        self.zone_input.setText(address_data.get("zone", ""))
 
-        # Set address dropdowns
-        province = receiver_data.get("province", "")
+        province = address_data.get("province", "")
         self.initialize_address_dropdowns()
         self.province_combo.setCurrentText(province)
         
-        district = receiver_data.get("district", "")
+        district = address_data.get("district", "")
         if province:
             districts = get_districts(province)
             if districts:
@@ -285,7 +271,7 @@ class ReceiverForm(QWidget):
                 self.district_combo.setEnabled(True)
         self.district_combo.setCurrentText(district)
 
-        sub_district = receiver_data.get("sub_district", "")
+        sub_district = address_data.get("sub_district", "")
         if province and district:
             sub_districts = get_sub_districts(province, district)
             if sub_districts:
@@ -293,26 +279,18 @@ class ReceiverForm(QWidget):
                 self.sub_district_combo.setEnabled(True)
         self.sub_district_combo.setCurrentText(sub_district)
 
-        # Unblock signals
         self.province_combo.blockSignals(False)
         self.district_combo.blockSignals(False)
         self.sub_district_combo.blockSignals(False)
 
-        self.delete_button.setVisible(True)
         self.show()
 
-    def save_receiver(self):
-        # Trigger validation on all fields
-        self.name_input._validate_input()
+    def save_address(self):
         self.address_detail_input._validate_input()
-        self.tel_input._validate_input()
 
-        # Collect data
         data = {
-            "id": self.current_receiver_id,
+            "id": self.current_address_id,
             "inventory_code": self.inventory_combo.currentText(),
-            "name": self.name_input.text(),
-            "tel": self.tel_input.text(),
             "province": self.province_combo.currentText(),
             "district": self.district_combo.currentText(),
             "sub_district": self.sub_district_combo.currentText(),
@@ -322,16 +300,13 @@ class ReceiverForm(QWidget):
             "zone": self.zone_input.text()
         }
 
-        # Validate data
         is_address_filled = not any(s.startswith('Select') for s in [data["province"], data["district"], data["sub_district"]])
         if not all([
-            self.name_input.isValid(), self.address_detail_input.isValid(), self.tel_input.isValid(),
+            self.address_detail_input.isValid(),
             data["inventory_code"], data["post_code"], is_address_filled, data["delivery_by"]
         ]):
-            self.name_input.show_error_if_invalid()
             self.address_detail_input.show_error_if_invalid()
-            self.tel_input.show_error_if_invalid()
-            QMessageBox.warning(self, "Input Error", "Please fill in all fields correctly and ensure they are valid.")
+            QMessageBox.warning(self, "Input Error", "Please fill in all required address fields.")
             return
 
         self.save_requested.emit(data)
