@@ -1,6 +1,9 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QMessageBox
 from PySide6.QtGui import QKeySequence, QShortcut
 
+# Utility Imports
+from src.utils.excel_exporter import export_table_to_excel
+
 # Refactored Component Imports
 from .components.receiver_table_view import ReceiverTableView
 from .components.receiver_form import ReceiverForm
@@ -92,13 +95,13 @@ class ReceiverManagement(QWidget):
             success, message = add_receiver(
                 inventory_code=data['inventory_code'], name=data['name'], address_detail=data['address_detail'],
                 sub_district=data['sub_district'], district=data['district'], province=data['province'],
-                post_code=data['post_code'], tel=data['tel'], delivery_by=data['delivery_by']
+                post_code=data['post_code'], tel=data['tel'], delivery_by=data['delivery_by'], zone=data['zone']
             )
         else: # Update existing
             success, message = update_receiver(
                 receiver_id=data['id'], inventory_code=data['inventory_code'], name=data['name'],
                 address_detail=data['address_detail'], sub_district=data['sub_district'], district=data['district'],
-                province=data['province'], post_code=data['post_code'], tel=data['tel'], delivery_by=data['delivery_by']
+                province=data['province'], post_code=data['post_code'], tel=data['tel'], delivery_by=data['delivery_by'], zone=data['zone']
             )
         
         if success:
@@ -125,4 +128,4 @@ class ReceiverManagement(QWidget):
         QMessageBox.information(self, "Import from Excel", "This feature is not yet implemented.")
 
     def export_to_excel(self):
-        QMessageBox.information(self, "Export to Excel", "This feature is not yet implemented.")
+        export_table_to_excel(self, self.table_widget.table, "Receivers", button=self.table_widget.export_button)

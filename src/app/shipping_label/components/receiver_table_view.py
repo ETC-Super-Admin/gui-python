@@ -1,8 +1,9 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QHeaderView,
-    QAbstractItemView, QHBoxLayout, QComboBox, QLineEdit, QPushButton
+    QAbstractItemView, QHBoxLayout, QComboBox, QLineEdit, QPushButton, QLabel, QMenu
 )
 from PySide6.QtCore import Signal
+from PySide6.QtGui import QAction
 import qtawesome as qta
 
 class ReceiverTableView(QWidget):
@@ -17,6 +18,10 @@ class ReceiverTableView(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.filter_methods = [
+            "Name", "Tel.", "Inventory", "Delivery By", "Province", 
+            "District", "Sub-district", "Post Code", "Zone"
+        ]
         self.setup_ui()
 
     def setup_ui(self):
@@ -24,24 +29,17 @@ class ReceiverTableView(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(10)
 
-        # Header with filter and action buttons
         header_layout = self._create_header_layout()
         layout.addLayout(header_layout)
 
-        # Table widget
         self.table = self._create_table_widget()
         layout.addWidget(self.table)
 
     def _create_header_layout(self):
         header_layout = QHBoxLayout()
-
-        self.filter_combo = QComboBox()
-        self.filter_combo.addItems([
-            "Search by Name", "Search by Tel.", "Search by Inventory", "Search by Delivery By",
-            "Search by Province", "Search by District", "Search by Sub-district", "Search by Post Code"
-        ])
-        self.filter_combo.currentTextChanged.connect(self.filter_table)
-        header_layout.addWidget(self.filter_combo)
+        
+        filter_widget = self._create_filter_widget()
+        header_layout.addWidget(filter_widget)
 
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText("Search table...")
@@ -56,7 +54,7 @@ class ReceiverTableView(QWidget):
         header_layout.addWidget(self.export_button)
 
         self.import_button = QPushButton(qta.icon('fa5s.file-import', color='white'), " Import Excel")
-        self.import_button.setObjectName("EditUserButton")  # Re-use amber style
+        self.import_button.setObjectName("EditUserButton")
         self.import_button.clicked.connect(self.import_requested.emit)
         header_layout.addWidget(self.import_button)
 
@@ -67,32 +65,54 @@ class ReceiverTableView(QWidget):
 
         return header_layout
 
+    def _create_filter_widget(self):
+        filter_widget = QWidget()
+        filter_layout = QHBoxLayout(filter_widget)
+        filter_layout.setContentsMargins(0,0,0,0)
+        filter_layout.setSpacing(5)
+
+        search_by_label = QLabel("Search by")
+        filter_layout.addWidget(search_by_label)
+
+        self.filter_button = QPushButton(self.filter_methods[0])
+        self.filter_button.setObjectName("FilterButton") # For styling
+        
+        filter_menu = QMenu(self)
+        for method in self.filter_methods:
+            action = QAction(method, self)
+            action.triggered.connect(lambda checked=False, m=method: self._set_filter_by(m))
+            filter_menu.addAction(action)
+        
+        self.filter_button.setMenu(filter_menu)
+        filter_layout.addWidget(self.filter_button)
+
+        return filter_widget
+
+    def _set_filter_by(self, method):
+        self.filter_button.setText(method)
+        self.filter_table() # Re-apply filter when method changes
+
     def _create_table_widget(self):
         table = QTableWidget()
         table.setObjectName("Card")
         table.setAlternatingRowColors(True)
-        table.setColumnCount(10)
+        table.setColumnCount(11)
         table.setHorizontalHeaderLabels([
             "ID", "Inventory", "Name", "Address Details", "Sub-district",
-            "District", "Province", "Post Code", "Tel.", "Delivery By"
+            "District", "Province", "Post Code", "Tel.", "Delivery By", "Zone"
         ])
         
         header = table.horizontalHeader()
         header.setMinimumSectionSize(80)
         header.setSectionResizeMode(2, QHeaderView.Stretch)  # Name column
         for i in range(table.columnCount()):
-            if i not in [0, 2]:  # Skip ID and Name
+            if i not in [0, 2]:
                 header.setSectionResizeMode(i, QHeaderView.Interactive)
 
-        table.setColumnWidth(1, 80)    # Inventory
-        table.setColumnWidth(3, 180)   # Address Details
-        table.setColumnWidth(4, 100)   # Sub-district
-        table.setColumnWidth(5, 100)   # District
-        table.setColumnWidth(6, 100)   # Province
-        table.setColumnWidth(7, 60)    # Post Code
-        table.setColumnWidth(8, 100)   # Tel
-        table.setColumnWidth(9, 100)   # Delivery By
-        table.setColumnHidden(0, True) # Hide ID
+        table.setColumnWidth(1, 80); table.setColumnWidth(3, 180); table.setColumnWidth(4, 100)
+        table.setColumnWidth(5, 100); table.setColumnWidth(6, 100); table.setColumnWidth(7, 60)
+        table.setColumnWidth(8, 100); table.setColumnWidth(9, 100); table.setColumnWidth(10, 80)
+        table.setColumnHidden(0, True)
 
         table.setSelectionBehavior(QAbstractItemView.SelectRows)
         table.setSelectionMode(QAbstractItemView.SingleSelection)
@@ -122,26 +142,26 @@ class ReceiverTableView(QWidget):
             self.table.setItem(row_position, 7, QTableWidgetItem(receiver["post_code"]))
             self.table.setItem(row_position, 8, QTableWidgetItem(receiver["tel"]))
             self.table.setItem(row_position, 9, QTableWidgetItem(receiver["delivery_by"]))
+            self.table.setItem(row_position, 10, QTableWidgetItem(receiver.get("zone", "")))
         self.clear_selection()
         self.search_input.clear()
 
     def filter_table(self):
-        filter_column_text = self.filter_combo.currentText()
+        filter_method = self.filter_button.text()
         search_text = self.search_input.text().lower()
 
         column_map = {
-            "Search by Name": 2, "Search by Tel.": 8, "Search by Inventory": 1,
-            "Search by Delivery By": 9, "Search by Province": 6, "Search by District": 5,
-            "Search by Sub-district": 4, "Search by Post Code": 7
+            "Name": 2, "Tel.": 8, "Inventory": 1, "Delivery By": 9, "Province": 6, 
+            "District": 5, "Sub-district": 4, "Post Code": 7, "Zone": 10
         }
-        filter_column_index = column_map.get(filter_column_text)
+        filter_column_index = column_map.get(filter_method)
 
         if filter_column_index is None:
             return
 
         for row in range(self.table.rowCount()):
             item = self.table.item(row, filter_column_index)
-            is_match = search_text in item.text().lower() if item else False
+            is_match = search_text in item.text().lower() if item and item.text() else False
             self.table.setRowHidden(row, not is_match)
 
     def clear_selection(self):

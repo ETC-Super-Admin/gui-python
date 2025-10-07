@@ -3,3 +3,4 @@ qtawesome
 werkzeug
 matplotlib
 python-dotenv
+openpyxl

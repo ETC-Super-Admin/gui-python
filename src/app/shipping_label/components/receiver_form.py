@@ -64,6 +64,10 @@ class ReceiverForm(QWidget):
         self.delivery_by_combo = QComboBox()
         form_layout.addRow("Delivery By:", self.delivery_by_combo)
 
+        self.zone_input = QLineEdit()
+        self.zone_input.setPlaceholderText("Enter zone (optional)")
+        form_layout.addRow("Zone:", self.zone_input)
+
         # --- Action Buttons ---
         form_action_layout = self._create_action_buttons()
         form_layout.addRow(form_action_layout)
@@ -238,6 +242,7 @@ class ReceiverForm(QWidget):
         self.name_input.clear()
         self.address_detail_input.clear()
         self.tel_input.clear()
+        self.zone_input.clear()
         
         default_code = get_config("bills_process_inventory_code")
         self.inventory_combo.setCurrentText(default_code if default_code else "")
@@ -265,6 +270,7 @@ class ReceiverForm(QWidget):
         self.tel_input.line_edit.setText(receiver_data.get("tel", ""))
         self.postcode_input.setText(receiver_data.get("post_code", ""))
         self.delivery_by_combo.setCurrentText(receiver_data.get("delivery_by", ""))
+        self.zone_input.setText(receiver_data.get("zone", "")) # Safely get zone
 
         # Set address dropdowns
         province = receiver_data.get("province", "")
@@ -312,7 +318,8 @@ class ReceiverForm(QWidget):
             "sub_district": self.sub_district_combo.currentText(),
             "address_detail": self.address_detail_input.text(),
             "post_code": self.postcode_input.text(),
-            "delivery_by": self.delivery_by_combo.currentText()
+            "delivery_by": self.delivery_by_combo.currentText(),
+            "zone": self.zone_input.text()
         }
 
         # Validate data
