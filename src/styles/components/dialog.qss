@@ -1,0 +1,95 @@
+/* Login Dialog */
+#LoginDialog {{
+    background-color: {BACKGROUND};
+    border: 1px solid {BORDER};
+    border-radius: 12px;
+}}
+
+#LoginLogo {{
+    color: {PRIMARY};
+}}
+
+#LoginInput QLineEdit {{
+    background-color: {CARD};
+    color: {FOREGROUND};
+    border: 1px solid {BORDER};
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 14px;
+}}
+
+#LoginInput QLineEdit:focus {{
+    border: 1px solid {PRIMARY};
+}}
+
+#LoginTogglePasswordButton {{
+    background-color: {SECONDARY};
+    color: {SECONDARY_FOREGROUND};
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+}}
+
+#LoginTogglePasswordButton:hover {{
+    background-color: {HOVER};
+}}
+
+#LoginTogglePasswordButton:checked {{
+    background-color: {PRIMARY};
+    color: {PRIMARY_FOREGROUND};
+}}
+
+#LoginCheckbox {{
+    color: {TEXT};
+    font-size: 13px;
+}}
+
+#LoginCheckbox::indicator {{
+    border: 2px solid {MUTED_FOREGROUND};
+    background-color: {BACKGROUND};
+    border-radius: 4px;
+    width: 16px;
+    height: 16px;
+}}
+
+#LoginCheckbox::indicator:hover {{
+    border: 2px solid {RING};
+}}
+
+#LoginCheckbox::indicator:checked {{
+    background-color: {PRIMARY};
+    border: 2px solid {PRIMARY};
+}}
+
+#LoginLink {{
+    color: {MUTED_FOREGROUND};
+    font-size: 13px;
+}}
+
+#LoginLink a {{
+    color: {PRIMARY};
+    text-decoration: none;
+}}
+
+#LoginLink a:hover {{
+    text-decoration: underline;
+}}
+
+#LoginButton {{
+    background-color: {PRIMARY};
+    color: {PRIMARY_FOREGROUND};
+    border: none;
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-weight: bold;
+    font-size: 16px;
+}}
+
+#LoginButton:hover {{
+    background-color: {RING};
+}}
+
+#LoginButton:disabled {{
+    background-color: {MUTED};
+    color: {MUTED_FOREGROUND};
+}}

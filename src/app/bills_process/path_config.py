@@ -56,6 +56,7 @@ class PathConfig(QWidget):
 
         self.config_table = QTableWidget()
         self.config_table.setObjectName("Card")
+        self.config_table.setAlternatingRowColors(True)
         self.config_table.setColumnCount(3)
         self.config_table.setHorizontalHeaderLabels(["Default", "Inventory Code", "Template Directory"])
         header = self.config_table.horizontalHeader()

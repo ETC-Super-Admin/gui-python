@@ -1,0 +1,67 @@
+/* Buttons */
+QPushButton {{
+    background-color: {PRIMARY};
+    color: {PRIMARY_FOREGROUND};
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: 500;
+}}
+
+QPushButton:hover {{
+    background-color: {RING};
+}}
+
+QPushButton:pressed {{
+    background-color: {PRIMARY};
+}}
+
+/* User Management Buttons */
+#AddUserButton {{
+    background-color: #22c55e; /* Tailwind green-500 */
+    color: {PRIMARY_FOREGROUND};
+}}
+#AddUserButton:hover {{
+    background-color: #16a34a; /* Tailwind green-600 */
+}}
+
+#EditUserButton {{
+    background-color: #f59e0b; /* Tailwind amber-500 */
+    color: {PRIMARY_FOREGROUND};
+}}
+#EditUserButton:hover {{
+    background-color: #d97706; /* Tailwind amber-600 */
+}}
+
+#ExportButton {{
+    background-color: {PRIMARY}; 
+    color: {PRIMARY_FOREGROUND};
+}}
+#ExportButton:hover {{
+    background-color: {RING}; 
+}}
+
+
+#DeleteUserButton {{
+    background-color: #ef4444; /* Tailwind red-500 */
+    color: {PRIMARY_FOREGROUND};
+}}
+#DeleteUserButton:hover {{
+    background-color: #dc2626; /* Tailwind red-600 */
+}}
+
+#SaveUserButton {{
+    background-color: {PRIMARY};
+    color: {PRIMARY_FOREGROUND};
+}}
+#SaveUserButton:hover {{
+    background-color: {RING};
+}}
+
+#CancelFormButton {{
+    background-color: {SECONDARY};
+    color: {SECONDARY_FOREGROUND};
+}}
+#CancelFormButton:hover {{
+    background-color: {MUTED};
+}}

@@ -1,0 +1,40 @@
+/* Input Fields */
+QLineEdit, QTextEdit, QPlainTextEdit {{
+    background-color: {CARD};
+    color: {FOREGROUND};
+    border: 1px solid {INPUT};
+    border-radius: 6px;
+    padding: 8px;
+}}
+
+QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus {{
+    border: 2px solid {RING};
+}}
+
+/* ComboBox */
+QComboBox {{
+    background-color: {CARD};
+    color: {FOREGROUND};
+    border: 1px solid {INPUT};
+    border-radius: 6px;
+    padding-left: 10px;
+    min-height: 35px;
+}}
+
+QComboBox:focus {{
+    border: 2px solid {RING};
+}}
+
+QComboBox:disabled {{
+    background-color: {MUTED};
+    color: {MUTED_FOREGROUND};
+}}
+
+QComboBox QAbstractItemView {{
+    background-color: {BACKGROUND};
+    border: 1px solid {BORDER};
+    border-radius: 6px;
+    selection-background-color: {PRIMARY};
+    selection-color: {PRIMARY_FOREGROUND};
+    outline: 0px;
+}}

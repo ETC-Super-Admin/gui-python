@@ -79,6 +79,14 @@ def delete_receiver(receiver_id):
         try:
             cursor.execute("DELETE FROM receivers WHERE id = ?", (receiver_id,))
             conn.commit()
-            return True, "Receiver deleted successfully."
         except sqlite3.Error as e:
             return False, f"Database error: {e}"
+
+def get_receiver_by_id(receiver_id):
+    """Retrieves a single receiver from the database by its ID."""
+    with sqlite3.connect(DATABASE_NAME) as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM receivers WHERE id = ?", (receiver_id,))
+        receiver_data = cursor.fetchone()
+        return dict(receiver_data) if receiver_data else None

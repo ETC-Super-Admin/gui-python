@@ -104,6 +104,11 @@ class SenderManagement(QWidget):
         self.sender_table.setColumnWidth(8, 120) # Tel
 
         self.sender_table.setColumnHidden(0, True) # Hide ID column
+
+        self.sender_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.sender_table.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.sender_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+
         self.sender_table.itemSelectionChanged.connect(self.on_sender_selection_changed)
         left_layout.addWidget(self.sender_table)
 

@@ -1,0 +1,72 @@
+/* Sidebar Container */
+#Sidebar {{
+    background-color: {CARD};
+    border-right: 1px solid {BORDER};
+}}
+
+/* Sidebar Header */
+#SidebarHeader {{
+    background-color: {SECONDARY};
+    border-bottom: 1px solid {BORDER};
+}}
+
+#AppTitle {{
+    background-color: transparent;
+    color: {FOREGROUND};
+    font-weight: bold;
+}}
+
+#SidebarHeader QLabel {{
+    background-color: transparent;
+}}
+
+/* Sidebar Navigation */
+#SidebarNav {{
+    background-color: transparent;
+}}
+
+/* Sidebar Buttons */
+#SidebarButton {{
+    background-color: transparent;
+    color: {MUTED_FOREGROUND};
+    border: none;
+    border-radius: 8px;
+    text-align: left;
+    padding-left: 15px;
+    font-weight: 500;
+}}
+
+#SidebarButton:hover {{
+    background-color: {HOVER};
+    color: {ACCENT_FOREGROUND};
+}}
+
+#SidebarButton:checked {{
+    background-color: {PRIMARY};
+    color: {PRIMARY_FOREGROUND};
+    font-weight: 600;
+}}
+
+#SidebarButton:checked:hover {{
+    background-color: {RING};
+}}
+
+#SidebarButton:pressed {{
+    background-color: {PRIMARY};
+}}
+
+/* Settings Submenu */
+#SettingsSubMenu {{
+    background-color: transparent;
+}}
+
+/* Sidebar Footer */
+#SidebarFooter {{
+    background-color: transparent;
+    border-top: 1px solid {BORDER};
+}}
+
+#VersionLabel {{
+    color: {MUTED_FOREGROUND};
+    font-size: 11px;
+}}

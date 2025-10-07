@@ -1,0 +1,15 @@
+/* Main Window */
+QMainWindow {{
+    background-color: {BACKGROUND};
+}}
+
+/* Content Area */
+QWidget {{
+    background-color: {BACKGROUND};
+    color: {TEXT};
+}}
+
+/* Labels */
+QLabel {{
+    color: {FOREGROUND};
+}}
