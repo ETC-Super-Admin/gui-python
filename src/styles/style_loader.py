@@ -8,7 +8,8 @@ COMPONENT_STYLES = [
     "navbar",
     "scrollbar",
     "table",
-    "dialog"
+    "dialog",
+    "card"
 ]
 
 def load_and_format_stylesheet(theme):

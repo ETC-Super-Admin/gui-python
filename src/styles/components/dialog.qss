@@ -1,3 +1,8 @@
+/* Dialogs - Enhanced */
+QDialog {{
+    background-color: {BACKGROUND};
+}}
+
 /* Login Dialog */
 #LoginDialog {{
     background-color: {BACKGROUND};
@@ -92,4 +97,35 @@
 #LoginButton:disabled {{
     background-color: {MUTED};
     color: {MUTED_FOREGROUND};
+}}
+
+/* Dialog Button Box - Enhanced */
+QDialogButtonBox QPushButton {{
+    min-width: 80px;
+    padding: 8px 16px;
+    min-height: 32px;
+}}
+
+/* Message Box - Enhanced */
+QMessageBox {{
+    background-color: {BACKGROUND};
+}}
+
+QMessageBox QLabel {{
+    color: {FOREGROUND};
+    font-size: 13px;
+}}
+
+QMessageBox QPushButton {{
+    min-width: 80px;
+}}
+
+/* Tooltip - Enhanced */
+QToolTip {{
+    background-color: #1e293b;
+    color: white;
+    border: 1px solid #334155;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 12px;
 }}

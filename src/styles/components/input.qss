@@ -1,28 +1,45 @@
-/* Input Fields */
+/* Input Fields - Enhanced */
 QLineEdit, QTextEdit, QPlainTextEdit {{
     background-color: {CARD};
     color: {FOREGROUND};
     border: 1px solid {INPUT};
     border-radius: 6px;
-    padding: 8px;
+    padding: 8px 12px;
+    min-height: 20px;
 }}
 
 QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus {{
     border: 2px solid {RING};
+    background-color: white;
 }}
 
-/* ComboBox */
+QLineEdit:hover, QTextEdit:hover, QPlainTextEdit:hover {{
+    border-color: #cbd5e1;
+}}
+
+QLineEdit:disabled, QTextEdit:disabled, QPlainTextEdit:disabled {{
+    background-color: {MUTED};
+    color: {MUTED_FOREGROUND};
+}}
+
+/* ComboBox - Enhanced */
 QComboBox {{
     background-color: {CARD};
     color: {FOREGROUND};
     border: 1px solid {INPUT};
     border-radius: 6px;
+    padding: 8px 12px;
     padding-left: 10px;
-    min-height: 35px;
+    min-height: 20px;
 }}
 
 QComboBox:focus {{
     border: 2px solid {RING};
+    background-color: white;
+}}
+
+QComboBox:hover {{
+    border-color: #cbd5e1;
 }}
 
 QComboBox:disabled {{
@@ -30,11 +47,28 @@ QComboBox:disabled {{
     color: {MUTED_FOREGROUND};
 }}
 
+/* ComboBox Dropdown */
+QComboBox::drop-down {{
+    border: none;
+    padding-right: 8px;
+}}
+
 QComboBox QAbstractItemView {{
-    background-color: {BACKGROUND};
+    background-color: {CARD};
     border: 1px solid {BORDER};
     border-radius: 6px;
     selection-background-color: {PRIMARY};
     selection-color: {PRIMARY_FOREGROUND};
     outline: 0px;
+    padding: 4px;
+}}
+
+QComboBox QAbstractItemView::item {{
+    padding: 8px 12px;
+    border-radius: 4px;
+    min-height: 24px;
+}}
+
+QComboBox QAbstractItemView::item:hover {{
+    background-color: {SECONDARY};
 }}

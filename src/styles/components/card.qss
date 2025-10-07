@@ -1,0 +1,30 @@
+/* Card Components */
+QWidget[objectName="Card"], QGroupBox[objectName="Card"] {{
+    background-color: {CARD};
+    border: 1px solid {BORDER};
+    border-radius: 12px;
+    padding: 8px;
+}}
+
+QGroupBox[objectName="Card"]::title {{
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 8px;
+    color: {FOREGROUND};
+    font-weight: bold;
+}}
+
+/* Stats Bar */
+QFrame[objectName="StatsBar"] {{
+    background-color: {CARD};
+    border: 1px solid {BORDER};
+    border-radius: 8px;
+    padding: 12px 16px;
+}}
+
+/* Separator Line */
+QFrame[frameShape="4"] {{ /* HLine */
+    background-color: {BORDER};
+    max-height: 1px;
+    border: none;
+}}

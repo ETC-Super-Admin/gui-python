@@ -124,11 +124,21 @@ def add_receiver_address(receiver_identity_id, data):
             return False, f"Database error: {e}"
 
 def get_all_receiver_identities():
-    """Retrieves all unique receivers (identities)."""
+    """Retrieves all unique receivers and includes a count of their addresses."""
     with sqlite3.connect(DATABASE_NAME) as conn:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM receiver_identities ORDER BY name")
+        cursor.execute("""
+            SELECT 
+                ri.id, 
+                ri.name, 
+                ri.tel, 
+                COUNT(ra.id) as address_count
+            FROM receiver_identities ri
+            LEFT JOIN receiver_addresses ra ON ri.id = ra.receiver_identity_id
+            GROUP BY ri.id
+            ORDER BY ri.name
+        """)
         return [dict(row) for row in cursor.fetchall()]
 
 def get_addresses_for_receiver(receiver_identity_id):
@@ -236,3 +246,17 @@ def get_all_receiver_addresses():
             ORDER BY ri.name, ra.created_at
         """)
         return [dict(row) for row in cursor.fetchall()]
+
+def set_default_address(receiver_identity_id, address_id):
+    """Sets a specific address as the default for a receiver, clearing any previous default."""
+    with sqlite3.connect(DATABASE_NAME) as conn:
+        cursor = conn.cursor()
+        try:
+            # First, clear any existing default for this receiver
+            cursor.execute("UPDATE receiver_addresses SET is_default = 0 WHERE receiver_identity_id = ?", (receiver_identity_id,))
+            # Then, set the new default
+            cursor.execute("UPDATE receiver_addresses SET is_default = 1 WHERE id = ? AND receiver_identity_id = ?", (address_id, receiver_identity_id))
+            conn.commit()
+            return True, "Default address set."
+        except sqlite3.Error as e:
+            return False, f"Database error: {e}"

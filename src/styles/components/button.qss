@@ -1,4 +1,4 @@
-/* Buttons */
+/* Buttons - Enhanced */
 QPushButton {{
     background-color: {PRIMARY};
     color: {PRIMARY_FOREGROUND};
@@ -6,6 +6,7 @@ QPushButton {{
     border-radius: 6px;
     padding: 8px 16px;
     font-weight: 500;
+    min-height: 20px;
 }}
 
 QPushButton:hover {{
@@ -14,6 +15,11 @@ QPushButton:hover {{
 
 QPushButton:pressed {{
     background-color: {PRIMARY};
+}}
+
+QPushButton:disabled {{
+    background-color: {MUTED};
+    color: {MUTED_FOREGROUND};
 }}
 
 /* User Management Buttons */
@@ -33,14 +39,29 @@ QPushButton:pressed {{
     background-color: #d97706; /* Tailwind amber-600 */
 }}
 
-#ExportButton {{
-    background-color: {PRIMARY}; 
-    color: {PRIMARY_FOREGROUND};
+/* Import Button - New */
+#ImportButton {{
+    background-color: #10b981; /* Tailwind emerald-500 */
+    color: white;
 }}
-#ExportButton:hover {{
-    background-color: {RING}; 
+#ImportButton:hover {{
+    background-color: #059669; /* Tailwind emerald-600 */
+}}
+#ImportButton:pressed {{
+    background-color: #047857; /* Tailwind emerald-700 */
 }}
 
+/* Export Button - Enhanced */
+#ExportButton {{
+    background-color: #8b5cf6; /* Tailwind violet-500 */
+    color: white;
+}}
+#ExportButton:hover {{
+    background-color: #7c3aed; /* Tailwind violet-600 */
+}}
+#ExportButton:pressed {{
+    background-color: #6d28d9; /* Tailwind violet-700 */
+}}
 
 #DeleteUserButton {{
     background-color: #ef4444; /* Tailwind red-500 */
@@ -61,6 +82,7 @@ QPushButton:pressed {{
 #CancelFormButton {{
     background-color: {SECONDARY};
     color: {SECONDARY_FOREGROUND};
+    border: 1px solid {BORDER};
 }}
 #CancelFormButton:hover {{
     background-color: {MUTED};

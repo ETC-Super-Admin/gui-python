@@ -2,7 +2,7 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QHeaderView,
     QAbstractItemView, QHBoxLayout, QLineEdit, QPushButton, QLabel
 )
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Signal, Qt
 import qtawesome as qta
 
 class ReceiverTableView(QWidget):
@@ -49,12 +49,13 @@ class ReceiverTableView(QWidget):
         table = QTableWidget()
         table.setObjectName("Card")
         table.setAlternatingRowColors(True)
-        table.setColumnCount(3)
-        table.setHorizontalHeaderLabels(["ID", "Name", "Telephone"])
+        table.setColumnCount(4)
+        table.setHorizontalHeaderLabels(["ID", "Name", "Telephone", "Addresses"])
         
         header = table.horizontalHeader()
         header.setSectionResizeMode(1, QHeaderView.Stretch)  # Name column
         header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
         table.setColumnHidden(0, True)
 
         table.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -70,9 +71,7 @@ class ReceiverTableView(QWidget):
             receiver_id = int(self.table.item(selected_items[0].row(), 0).text())
             self.receiver_selected.emit(receiver_id)
         else:
-            # Emit a signal with an invalid ID or None when selection is cleared
             self.receiver_selected.emit(-1)
-
 
     def populate_table(self, receivers):
         self.table.setRowCount(0)
@@ -82,6 +81,11 @@ class ReceiverTableView(QWidget):
             self.table.setItem(row_position, 0, QTableWidgetItem(str(receiver["id"])))
             self.table.setItem(row_position, 1, QTableWidgetItem(receiver["name"]))
             self.table.setItem(row_position, 2, QTableWidgetItem(receiver.get("tel", "")))
+            
+            count_item = QTableWidgetItem(str(receiver.get("address_count", 0)))
+            count_item.setTextAlignment(Qt.AlignCenter)
+            self.table.setItem(row_position, 3, count_item)
+
         self.clear_selection()
         self.search_input.clear()
 

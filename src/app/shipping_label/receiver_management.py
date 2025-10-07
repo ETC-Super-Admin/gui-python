@@ -21,7 +21,8 @@ from src.db.receiver_queries import (
     initialize_receiver_db, get_all_receiver_identities, get_addresses_for_receiver,
     add_receiver_identity, add_receiver_address, update_receiver_identity, 
     update_receiver_address, delete_receiver_identity, delete_receiver_address,
-    get_receiver_address_by_id, find_exact_address, get_all_receiver_addresses
+    get_receiver_address_by_id, find_exact_address, get_all_receiver_addresses,
+    set_default_address
 )
 from src.db.delivery_by_queries import initialize_delivery_db, get_all_delivery_options, add_delivery_option
 
@@ -90,11 +91,9 @@ class ReceiverManagement(QWidget):
         content_layout = QHBoxLayout()
         main_layout.addLayout(content_layout)
 
-        # --- Left Side (Master Receiver List) ---
         self.receivers_table_widget = ReceiverTableView()
         content_layout.addWidget(self.receivers_table_widget, 3)
 
-        # --- Right Side (Address Details) ---
         right_side_widget = QWidget()
         right_layout = QVBoxLayout(right_side_widget)
         right_layout.setContentsMargins(0,0,0,0)
@@ -111,11 +110,15 @@ class ReceiverManagement(QWidget):
         address_actions_layout.addWidget(self.receiver_name_label)
         address_actions_layout.addStretch()
         
+        self.set_default_button = QPushButton(qta.icon('fa5s.star', color='#64748b'), " Set as Default")
+        self.set_default_button.setEnabled(False)
         self.edit_receiver_button = QPushButton(qta.icon('fa5s.edit', color='#64748b'), " Edit Receiver")
-        self.delete_receiver_button = QPushButton(qta.icon('fa5s.trash-alt', color='#ef4444'), " Delete Receiver")
+        self.delete_receiver_button = QPushButton(qta.icon('fa5s.trash-alt', color='white'), " Delete Receiver")
+        self.delete_receiver_button.setObjectName("DeleteUserButton")
         self.add_address_button = QPushButton(qta.icon('fa5s.plus', color='white'), " Add Address")
         self.add_address_button.setObjectName("AddUserButton")
 
+        address_actions_layout.addWidget(self.set_default_button)
         address_actions_layout.addWidget(self.edit_receiver_button)
         address_actions_layout.addWidget(self.delete_receiver_button)
         address_actions_layout.addWidget(self.add_address_button)
@@ -130,11 +133,12 @@ class ReceiverManagement(QWidget):
     def _create_address_table(self):
         table = QTableWidget()
         table.setAlternatingRowColors(True)
-        table.setColumnCount(9)
-        table.setHorizontalHeaderLabels(["ID", "Inventory", "Address", "Sub-district", "District", "Province", "Post Code", "Delivery By", "Zone"])
+        table.setColumnCount(10)
+        table.setHorizontalHeaderLabels(["ID", "Default", "Inventory", "Address", "Sub-district", "District", "Province", "Post Code", "Delivery By", "Zone"])
         table.setColumnHidden(0, True)
         header = table.horizontalHeader()
-        header.setSectionResizeMode(2, QHeaderView.Stretch)
+        header.setSectionResizeMode(3, QHeaderView.Stretch)
+        header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
         table.setSelectionBehavior(QAbstractItemView.SelectRows)
         table.setSelectionMode(QAbstractItemView.SingleSelection)
         table.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -150,6 +154,7 @@ class ReceiverManagement(QWidget):
         self.edit_receiver_button.clicked.connect(self.edit_receiver)
         self.delete_receiver_button.clicked.connect(self.delete_receiver)
         self.add_address_button.clicked.connect(self.add_address)
+        self.set_default_button.clicked.connect(self.set_selected_address_as_default)
         self.address_table.itemSelectionChanged.connect(self.on_address_selected)
 
         self.address_form_widget.save_requested.connect(self.save_address_form)
@@ -164,6 +169,7 @@ class ReceiverManagement(QWidget):
         self.address_form_widget.hide()
         self.current_receiver_id = receiver_id
         self.address_table.clearSelection()
+        self.set_default_button.setEnabled(False)
 
         if receiver_id > 0:
             self.address_details_group.show()
@@ -184,22 +190,29 @@ class ReceiverManagement(QWidget):
             row = self.address_table.rowCount()
             self.address_table.insertRow(row)
             self.address_table.setItem(row, 0, QTableWidgetItem(str(addr["id"])))
-            self.address_table.setItem(row, 1, QTableWidgetItem(addr["inventory_code"]))
-            self.address_table.setItem(row, 2, QTableWidgetItem(addr["address_detail"]))
-            self.address_table.setItem(row, 3, QTableWidgetItem(addr["sub_district"]))
-            self.address_table.setItem(row, 4, QTableWidgetItem(addr["district"]))
-            self.address_table.setItem(row, 5, QTableWidgetItem(addr["province"]))
-            self.address_table.setItem(row, 6, QTableWidgetItem(addr["post_code"]))
-            self.address_table.setItem(row, 7, QTableWidgetItem(addr["delivery_by"]))
-            self.address_table.setItem(row, 8, QTableWidgetItem(addr.get("zone", "")))
+            
+            default_item = QTableWidgetItem("★" if addr.get("is_default") else "")
+            default_item.setTextAlignment(Qt.AlignCenter)
+            self.address_table.setItem(row, 1, default_item)
+
+            self.address_table.setItem(row, 2, QTableWidgetItem(addr["inventory_code"]))
+            self.address_table.setItem(row, 3, QTableWidgetItem(addr["address_detail"]))
+            self.address_table.setItem(row, 4, QTableWidgetItem(addr["sub_district"]))
+            self.address_table.setItem(row, 5, QTableWidgetItem(addr["district"]))
+            self.address_table.setItem(row, 6, QTableWidgetItem(addr["province"]))
+            self.address_table.setItem(row, 7, QTableWidgetItem(addr["post_code"]))
+            self.address_table.setItem(row, 8, QTableWidgetItem(addr["delivery_by"]))
+            self.address_table.setItem(row, 9, QTableWidgetItem(addr.get("zone", "")))
 
     def on_address_selected(self):
         selected = self.address_table.selectedItems()
         if not selected: 
             self.current_address_id = None
+            self.set_default_button.setEnabled(False)
             return
         
         self.current_address_id = int(self.address_table.item(selected[0].row(), 0).text())
+        self.set_default_button.setEnabled(True)
         address_data = get_receiver_address_by_id(self.current_address_id)
         if address_data:
             self.address_form_widget.set_edit_mode(address_data)
@@ -268,6 +281,14 @@ class ReceiverManagement(QWidget):
                 self.address_form_widget.hide()
             else:
                 QMessageBox.warning(self, "Error", msg)
+
+    def set_selected_address_as_default(self):
+        if not self.current_address_id or not self.current_receiver_id: return
+        success, msg = set_default_address(self.current_receiver_id, self.current_address_id)
+        if success:
+            self.populate_address_table(self.current_receiver_id)
+        else:
+            QMessageBox.warning(self, "Error", msg)
 
     def save_address_form(self, data):
         if self.current_address_id and data.get('id') == self.current_address_id: # Update
