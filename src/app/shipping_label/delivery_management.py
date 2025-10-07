@@ -40,6 +40,13 @@ class DeliveryManagement(QWidget):
         self.setup_ui()
         self.load_options_to_table()
 
+    def showEvent(self, event):
+        """Override showEvent to refresh data when the widget is shown."""
+        super().showEvent(event)
+        if self.isVisible():
+            print("DeliveryManagement showEvent triggered") # Debug print
+            self.load_options_to_table()
+
     def setup_ui(self):
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(20, 20, 20, 20)
@@ -65,6 +72,7 @@ class DeliveryManagement(QWidget):
         # --- Table of existing options ---
         self.options_table = QTableWidget()
         self.options_table.setObjectName("Card")
+        self.options_table.setAlternatingRowColors(True)
         self.options_table.setColumnCount(2)
         self.options_table.setHorizontalHeaderLabels(["Default", "Delivery Option Name"])
         header = self.options_table.horizontalHeader()

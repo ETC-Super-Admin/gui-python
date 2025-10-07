@@ -1,6 +1,8 @@
 from PySide6.QtWidgets import QFileDialog, QMessageBox
+from PySide6.QtCore import QSettings, QStandardPaths
 import openpyxl
 from datetime import datetime
+import os
 
 def export_table_to_excel(parent_widget, table_widget, sheet_title="Sheet1", button=None):
     """
@@ -17,6 +19,10 @@ def export_table_to_excel(parent_widget, table_widget, sheet_title="Sheet1", but
         original_text = button.text()
         button.setText("Exporting...")
         button.setEnabled(False)
+
+    settings = QSettings("ProAuto", "App")
+    last_export_directory = settings.value("excel/last_export_directory", 
+                                           QStandardPaths.writableLocation(QStandardPaths.DocumentsLocation))
 
     try:
         # 1. Get Headers
@@ -47,12 +53,15 @@ def export_table_to_excel(parent_widget, table_widget, sheet_title="Sheet1", but
         file_path, _ = QFileDialog.getSaveFileName(
             parent_widget, 
             "Save Excel File", 
-            default_filename, 
+            os.path.join(last_export_directory, default_filename), # Use last directory
             "Excel Files (*.xlsx)"
         )
 
         if not file_path:
             return  # User cancelled
+
+        # Save the newly selected directory
+        settings.setValue("excel/last_export_directory", os.path.dirname(file_path))
 
         # 4. Write to Excel file
         workbook = openpyxl.Workbook()

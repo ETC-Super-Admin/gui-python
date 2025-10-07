@@ -103,3 +103,8 @@ def get_receiver_by_id(receiver_id):
         cursor.execute("SELECT * FROM receivers WHERE id = ?", (receiver_id,))
         receiver_data = cursor.fetchone()
         return dict(receiver_data) if receiver_data else None
+
+def get_all_receivers_as_dict():
+    """Retrieves all receivers from the database and returns them as a dictionary keyed by name."""
+    receivers_list = get_all_receivers()
+    return {receiver['name']: receiver for receiver in receivers_list}
