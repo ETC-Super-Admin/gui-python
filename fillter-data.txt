@@ -1,0 +1,94 @@
+import sys
+import io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+import openpyxl
+from openpyxl import Workbook
+from openpyxl.utils import get_column_letter
+
+
+def _find_next_in_column(sheet, start_row, col_idx, keyword):
+    """Find next row after start_row in same column that contains keyword."""
+    for row in range(start_row + 1, sheet.max_row + 1):
+        val = sheet.cell(row=row, column=col_idx).value
+        if val and isinstance(val, str) and keyword in val:
+            return {"value": val, "column": get_column_letter(col_idx), "row": row}
+    return None
+
+
+def find_columns_with_name(file_path, output_path='filter-data.xlsx'):
+    """
+    Improved version:
+    - Each 'ชื่อ' finds its nearest 'ที่อยู่' and 'เบอร์' BELOW it in same column.
+    - Falls back to previous nearest-match logic if not found below.
+    """
+    try:
+        workbook = openpyxl.load_workbook(file_path)
+        output_wb = Workbook()
+        output_ws = output_wb.active
+        output_ws.title = "Filter Results"
+
+        headers = [
+            "Index", "Sheet Number", "Sheet Name",
+            "Variant Name", "Found on Column", "Row Found",
+            "Variant Address", "Address Column", "Address Row",
+            "Variant Number", "Number Column", "Number Row"
+        ]
+        output_ws.append(headers)
+
+        result_index = 1
+        sheet_number = 0
+
+        for sheet_name in workbook.sheetnames:
+            sheet_number += 1
+            sheet = workbook[sheet_name]
+            if sheet.max_row == 0:
+                continue
+
+            name_occurrences = []
+            for col_idx in range(1, sheet.max_column + 1):
+                col_letter = get_column_letter(col_idx)
+                for row_idx in range(1, sheet.max_row + 1):
+                    val = sheet.cell(row=row_idx, column=col_idx).value
+                    if val and isinstance(val, str) and "ชื่อ" in val:
+                        name_occurrences.append({
+                            "variant_name": val,
+                            "column": col_letter,
+                            "row": row_idx,
+                            "col_idx": col_idx
+                        })
+
+            # For each name, find address/number BELOW in same column
+            for name in name_occurrences:
+                addr = _find_next_in_column(sheet, name["row"], name["col_idx"], "ที่อยู่")
+                num = _find_next_in_column(sheet, name["row"], name["col_idx"], "เบอร์")
+
+                row_data = [
+                    result_index,
+                    sheet_number,
+                    sheet_name,
+                    name["variant_name"],
+                    name["column"],
+                    name["row"],
+                    addr["value"] if addr else "",
+                    addr["column"] if addr else "",
+                    addr["row"] if addr else "",
+                    num["value"] if num else "",
+                    num["column"] if num else "",
+                    num["row"] if num else "",
+                ]
+                output_ws.append(row_data)
+                result_index += 1
+
+        output_wb.save(output_path)
+        print(f"✓ Results saved to '{output_path}'")
+        print(f"✓ Total entries found: {result_index - 1}")
+
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        import traceback
+        traceback.print_exc()
+
+
+if __name__ == '__main__':
+    file_to_inspect = r'C:\Users\Admin\Desktop\gemini-test\data-collecter\receiver-address.xlsx'
+    find_columns_with_name(file_to_inspect)
