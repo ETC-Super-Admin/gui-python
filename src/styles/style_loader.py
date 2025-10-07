@@ -9,7 +9,8 @@ COMPONENT_STYLES = [
     "scrollbar",
     "table",
     "dialog",
-    "card"
+    "card",
+    "receiver_table_view"
 ]
 
 def load_and_format_stylesheet(theme):

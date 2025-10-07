@@ -1,0 +1,6 @@
+ReceiverTableView[objectName="Card"] {{
+    background-color: {CARD};
+    border: 1px solid {BORDER};
+    border-radius: 12px;
+    padding: 8px;
+}}

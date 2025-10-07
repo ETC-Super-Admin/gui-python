@@ -1,5 +1,5 @@
 /* Card Components */
-QWidget[objectName="Card"], QGroupBox[objectName="Card"] {{
+QFrame[objectName="Card"], QWidget[objectName="Card"], QGroupBox[objectName="Card"] {{
     background-color: {CARD};
     border: 1px solid {BORDER};
     border-radius: 12px;

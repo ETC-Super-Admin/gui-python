@@ -260,3 +260,12 @@ def set_default_address(receiver_identity_id, address_id):
             return True, "Default address set."
         except sqlite3.Error as e:
             return False, f"Database error: {e}"
+
+def get_receiver_identity_by_id(receiver_id):
+    """Retrieves a single receiver identity by their ID."""
+    with sqlite3.connect(DATABASE_NAME) as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM receiver_identities WHERE id = ?", (receiver_id,))
+        data = cursor.fetchone()
+        return dict(data) if data else None

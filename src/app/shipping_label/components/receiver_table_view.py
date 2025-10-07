@@ -13,8 +13,9 @@ class ReceiverTableView(QWidget):
     add_receiver_requested = Signal()
     receiver_selected = Signal(int)  # Emits receiver identity ID
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, show_add_button=True):
         super().__init__(parent)
+        self.show_add_button = show_add_button
         self.setup_ui()
 
     def setup_ui(self):
@@ -32,30 +33,27 @@ class ReceiverTableView(QWidget):
         header_layout = QHBoxLayout()
         
         self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText("Search by name or tel...")
+        self.search_input.setPlaceholderText("Search by name...")
         self.search_input.textChanged.connect(self.filter_table)
         header_layout.addWidget(self.search_input)
 
-        header_layout.addStretch()
-
-        self.add_button = QPushButton(qta.icon('fa5s.plus', color='white'), " Add Receiver")
-        self.add_button.setObjectName("AddUserButton")
-        self.add_button.clicked.connect(self.add_receiver_requested.emit)
-        header_layout.addWidget(self.add_button)
+        if self.show_add_button:
+            self.add_button = QPushButton(qta.icon('fa5s.plus', color='white'), " Add Receiver")
+            self.add_button.setObjectName("AddUserButton")
+            self.add_button.clicked.connect(self.add_receiver_requested.emit)
+            header_layout.addWidget(self.add_button)
 
         return header_layout
 
     def _create_table_widget(self):
         table = QTableWidget()
-        table.setObjectName("Card")
         table.setAlternatingRowColors(True)
-        table.setColumnCount(4)
-        table.setHorizontalHeaderLabels(["ID", "Name", "Telephone", "Addresses"])
+        table.setColumnCount(3)
+        table.setHorizontalHeaderLabels(["ID", "Name", "Addresses"])
         
         header = table.horizontalHeader()
         header.setSectionResizeMode(1, QHeaderView.Stretch)  # Name column
         header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
         table.setColumnHidden(0, True)
 
         table.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -80,11 +78,10 @@ class ReceiverTableView(QWidget):
             self.table.insertRow(row_position)
             self.table.setItem(row_position, 0, QTableWidgetItem(str(receiver["id"])))
             self.table.setItem(row_position, 1, QTableWidgetItem(receiver["name"]))
-            self.table.setItem(row_position, 2, QTableWidgetItem(receiver.get("tel", "")))
             
             count_item = QTableWidgetItem(str(receiver.get("address_count", 0)))
             count_item.setTextAlignment(Qt.AlignCenter)
-            self.table.setItem(row_position, 3, count_item)
+            self.table.setItem(row_position, 2, count_item)
 
         self.clear_selection()
         self.search_input.clear()
@@ -94,12 +91,10 @@ class ReceiverTableView(QWidget):
 
         for row in range(self.table.rowCount()):
             name_item = self.table.item(row, 1)
-            tel_item = self.table.item(row, 2)
             
             name_match = search_text in name_item.text().lower() if name_item and name_item.text() else False
-            tel_match = search_text in tel_item.text().lower() if tel_item and tel_item.text() else False
             
-            self.table.setRowHidden(row, not (name_match or tel_match))
+            self.table.setRowHidden(row, not name_match)
 
     def clear_selection(self):
         self.table.clearSelection()

@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QStackedWidget, QSizePolicy, QApplication
-from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Signal
+from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Signal, QSettings
 from src.components.layout.navbar import Navbar
 from src.components.layout.sidebar import Sidebar
 from src.app.dashboard.dashboard import Dashboard
@@ -59,8 +59,10 @@ class MainLayout(QWidget):
         main_layout.addWidget(content_area, 4)
 
         self.navbar = Navbar(theme_manager, username, role)
+        current_user = self.user_manager.get_current_user()
+        user_email = current_user.get('email', '') if current_user else ''
         initials = username[0].upper() if username else ""
-        self.navbar.set_user_info(username, "john.doe@example.com", initials)
+        self.navbar.set_user_info(username, user_email, initials)
         content_layout.addWidget(self.navbar)
 
         self.page_container = QStackedWidget()
@@ -100,11 +102,20 @@ class MainLayout(QWidget):
         last_active_page = self.user_manager.get_last_active_page()
         self.switch_page(last_active_page)
 
+        # Load and apply sidebar state
+        settings = QSettings("ProAuto", "App")
+        is_expanded = settings.value("ui/sidebar_expanded", "true") == "true"
+        if not is_expanded:
+            self.sidebar.setMaximumWidth(0)
+            self.navbar.update_sidebar_toggle_icon(False)
+
     def update_user_info(self, username, role):
         self.username = username
         self.role = role
         initials = username[0].upper() if username else ""
-        self.navbar.set_user_info(username, "john.doe@example.com", initials)
+        current_user = self.user_manager.get_current_user()
+        user_email = current_user.get('email', '') if current_user else ''
+        self.navbar.set_user_info(username, user_email, initials)
         self.sidebar.update_user_info(username, role)
 
         destination = self.user_manager.intended_destination or self.user_manager.get_last_active_page()
@@ -121,6 +132,10 @@ class MainLayout(QWidget):
             self.sidebar_animation.setEndValue(300)
         self.sidebar_animation.start()
         self.navbar.update_sidebar_toggle_icon(not is_expanded)
+
+        # Save the new state
+        settings = QSettings("ProAuto", "App")
+        settings.setValue("ui/sidebar_expanded", not is_expanded)
 
     def switch_page(self, page_name):
         if page_name not in self.pages:

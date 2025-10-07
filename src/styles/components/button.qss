@@ -87,3 +87,35 @@ QPushButton:disabled {{
 #CancelFormButton:hover {{
     background-color: {MUTED};
 }}
+
+/* Print Option Buttons */
+#PageSetupButton, #SavePdfButton, #PrintButton {{
+    padding: 5px 12px; /* Smaller padding */
+    font-weight: normal;
+}}
+
+#PageSetupButton {{
+    background-color: {SECONDARY};
+    color: {SECONDARY_FOREGROUND};
+    border: 1px solid {BORDER};
+}}
+#PageSetupButton:hover {{
+    background-color: {MUTED};
+}}
+
+#SavePdfButton {{
+    background-color: #8b5cf6; /* Tailwind violet-500 */
+    color: white;
+}}
+#SavePdfButton:hover {{
+    background-color: #7c3aed; /* Tailwind violet-600 */
+}}
+
+#PrintButton {{
+    background-color: #22c55e; /* Tailwind green-500 */
+    color: white;
+}}
+#PrintButton:hover {{
+    background-color: #16a34a; /* Tailwind green-600 */
+}}
+

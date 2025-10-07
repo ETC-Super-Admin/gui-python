@@ -11,6 +11,7 @@ QLineEdit, QTextEdit, QPlainTextEdit {{
 QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus {{
     border: 2px solid {RING};
     background-color: white;
+    color: #020817; /* Set text to black on focus */
 }}
 
 QLineEdit:hover, QTextEdit:hover, QPlainTextEdit:hover {{
@@ -36,6 +37,7 @@ QComboBox {{
 QComboBox:focus {{
     border: 2px solid {RING};
     background-color: white;
+    color: #020817; /* Set text to black on focus */
 }}
 
 QComboBox:hover {{
@@ -67,8 +69,89 @@ QComboBox QAbstractItemView::item {{
     padding: 8px 12px;
     border-radius: 4px;
     min-height: 24px;
+    color: {FOREGROUND}; /* Explicitly set default text color */
 }}
 
 QComboBox QAbstractItemView::item:hover {{
     background-color: {SECONDARY};
+    color: {ACCENT_FOREGROUND}; /* Explicitly set text color on hover */
 }}
+
+/* SpinBox - Enhanced */
+QSpinBox {{
+    background-color: {CARD};
+    color: {FOREGROUND};
+    border: 1px solid {INPUT};
+    border-radius: 6px;
+    padding: 8px 12px;
+    min-height: 20px;
+}}
+
+QSpinBox:focus {{
+    border: 2px solid {RING};
+    background-color: white;
+    color: #020817;
+}}
+
+QSpinBox:hover {{
+    border-color: #cbd5e1;
+}}
+
+/* Custom SpinBox */
+#CustomSpinBox QLineEdit#SpinBoxLineEdit {{
+    border: 1px solid {INPUT};
+    border-right: none;
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+    background-color: {CARD};
+    color: {FOREGROUND};
+    padding: 8px 12px;
+    min-height: 20px;
+}}
+#CustomSpinBox QLineEdit#SpinBoxLineEdit:focus {{
+    border: 2px solid {RING};
+    border-right: none;
+    background-color: white;
+    color: #020817;
+}}
+
+#CustomSpinBox QPushButton#PlusSpinBoxButton {{
+    background-color: {SECONDARY};
+    border: 1px solid {INPUT};
+    border-left: 1px solid {BORDER};
+    border-right: none;
+    border-radius: 0px;
+    padding: 8px;
+    min-height: 20px;
+}}
+
+#CustomSpinBox QPushButton#MinusSpinBoxButton {{
+    background-color: {SECONDARY};
+    border: 1px solid {INPUT};
+    border-left: 1px solid {BORDER};
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    padding: 8px;
+    min-height: 20px;
+}}
+
+#CustomSpinBox QPushButton:hover {{
+    background-color: {HOVER};
+}}
+
+
+/* Splitter Handle */
+/* QSplitter::handle {{
+    background-color: transparent;
+}} */
+QSplitter::handle:horizontal {{
+    image: url(public/grip-vertical.svg);
+    background-repeat: no-repeat;
+    background-position: center center;
+}}
+/* QSplitter::handle:hover {{
+    background-color: {HOVER};
+}}
+QSplitter::handle:pressed {{
+    background-color: {RING};
+}} */
