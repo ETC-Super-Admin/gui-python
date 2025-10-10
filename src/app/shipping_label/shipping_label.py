@@ -3,6 +3,7 @@ from PySide6.QtWidgets import (
     QFormLayout, QComboBox, QLineEdit, QPushButton, QSizePolicy, QMessageBox
 )
 from PySide6.QtCore import Qt
+from PySide6.QtPrintSupport import QPrinter
 
 # Import components and DB queries
 from src.components.custom_spinbox import CustomSpinBox
@@ -13,6 +14,7 @@ from src.db.receiver_queries import get_all_receiver_identities, get_addresses_f
 from src.db.sender_queries import get_all_senders
 from src.db.config_queries import get_config
 from src.utils.widget_to_pdf import save_widget_as_pdf
+from src.utils.direct_printer import page_setup, direct_print
 import qtawesome as qta
 
 class ShippingLabel(QWidget):
@@ -20,6 +22,7 @@ class ShippingLabel(QWidget):
         super().__init__()
         
         self.senders_data = [] # Cache for sender data
+        self.printer = QPrinter(QPrinter.HighResolution)
 
         main_layout = QHBoxLayout(self)
         main_layout.setContentsMargins(20, 20, 20, 20)
@@ -142,11 +145,13 @@ class ShippingLabel(QWidget):
 
         page_setup_btn = QPushButton(qta.icon('fa5s.file', color='#64748b'), " Page Setup")
         page_setup_btn.setObjectName("PageSetupButton")
+        page_setup_btn.clicked.connect(self.handle_page_setup)
         save_pdf_btn = QPushButton(qta.icon('fa5s.file-pdf', color='white'), " Save as PDF")
         save_pdf_btn.setObjectName("SavePdfButton")
         save_pdf_btn.clicked.connect(self.save_label_as_pdf)
         print_btn = QPushButton(qta.icon('fa5s.print', color='white'), " Print")
         print_btn.setObjectName("PrintButton")
+        print_btn.clicked.connect(self.handle_direct_print)
         
         bottom_row_layout.addWidget(page_setup_btn)
         bottom_row_layout.addWidget(save_pdf_btn)
@@ -160,6 +165,12 @@ class ShippingLabel(QWidget):
 
         main_v_layout.addStretch()
         return container
+
+    def handle_page_setup(self):
+        page_setup(self, self.printer)
+
+    def handle_direct_print(self):
+        direct_print(self, self.label_preview, self.printer)
 
     def save_label_as_pdf(self):
         if not self.receiver_name_input.text():

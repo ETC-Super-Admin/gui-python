@@ -117,9 +117,7 @@ def draw_label_page(c, page_width, page_height,
     sender_story = []
     if sender_logo_path and os.path.exists(sender_logo_path):
         try:
-            img_h = 60
-            img_w = img_h * (16/9)
-            img = Image(sender_logo_path, width=img_w, height=img_h)
+            img = Image(sender_logo_path, width=sender_col_width - (4*mm), height=50)
             img.hAlign = 'CENTER'
             sender_story.append(img)
         except Exception as e:
