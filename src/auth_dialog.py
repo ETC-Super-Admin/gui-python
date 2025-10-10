@@ -19,7 +19,7 @@ class LoginDialog(QDialog):
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(30, 30, 30, 30) # Add padding
         main_layout.setAlignment(Qt.AlignCenter)
-        main_layout.setSpacing(15)
+        main_layout.setSpacing(12)
 
         # Branding/Logo Area
         logo_label = QLabel("ProAuto")
@@ -29,7 +29,7 @@ class LoginDialog(QDialog):
         main_layout.addWidget(logo_label)
 
         # Spacer after logo
-        main_layout.addSpacing(20)
+        main_layout.addSpacing(15)
 
         def validate_username(text):
             if len(text) < 3:
@@ -46,7 +46,7 @@ class LoginDialog(QDialog):
             validation_func=validate_username,
             validation_mode='on_demand'
         )
-        self.username_input.setObjectName("LoginInput")
+
         self.username_input.line_edit.returnPressed.connect(self._on_return_pressed)
         self.username_input.validation_changed.connect(self._check_form_validity)
         main_layout.addWidget(self.username_input)
@@ -64,7 +64,7 @@ class LoginDialog(QDialog):
             toggle_button=self.toggle_password_visibility_button,
             validation_mode='on_demand'
         )
-        self.password_input.setObjectName("LoginInput")
+
         self.password_input.line_edit.returnPressed.connect(self._on_return_pressed)
         self.password_input.validation_changed.connect(self._check_form_validity)
         main_layout.addWidget(self.password_input)
@@ -88,7 +88,7 @@ class LoginDialog(QDialog):
         main_layout.addWidget(self.login_button)
         self.login_button.setEnabled(False) # Disable initially
 
-        main_layout.addSpacing(15) # Spacer before create account link
+        main_layout.addSpacing(10) # Spacer before create account link
 
         create_account_link = QLabel("Don't have an account? <a href=\"#\">Create one</a>")
         create_account_link.setObjectName("LoginLink")

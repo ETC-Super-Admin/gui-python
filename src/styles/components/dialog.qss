@@ -14,18 +14,7 @@ QDialog {{
     color: {PRIMARY};
 }}
 
-#LoginInput QLineEdit {{
-    background-color: {CARD};
-    color: {FOREGROUND};
-    border: 1px solid {BORDER};
-    border-radius: 8px;
-    padding: 10px;
-    font-size: 14px;
-}}
 
-#LoginInput QLineEdit:focus {{
-    border: 1px solid {PRIMARY};
-}}
 
 #LoginTogglePasswordButton {{
     background-color: {SECONDARY};
@@ -99,11 +88,14 @@ QDialog {{
     color: {MUTED_FOREGROUND};
 }}
 
-/* Dialog Button Box - Enhanced */
-QDialogButtonBox QPushButton {{
-    min-width: 80px;
-    padding: 8px 16px;
-    min-height: 32px;
+/* Dialog Button Box & Message Box Buttons */
+QDialogButtonBox QPushButton,
+QMessageBox QPushButton {{
+    min-width: 50px;
+    padding: 4px 8px;
+    min-height: 28px;
+    border-radius: 6px;
+    font-weight: 500;
 }}
 
 /* Message Box - Enhanced */
@@ -116,8 +108,59 @@ QMessageBox QLabel {{
     font-size: 13px;
 }}
 
-QMessageBox QPushButton {{
-    min-width: 80px;
+/* --- Role-based button coloring for Dialogs & MessageBoxes --- */
+
+/* Affirmative: Yes, OK, Save */
+QDialogButtonBox QPushButton[button-role="AcceptRole"],
+QDialogButtonBox QPushButton[button-role="YesRole"],
+QMessageBox QPushButton[button-role="AcceptRole"],
+QMessageBox QPushButton[button-role="YesRole"] {{
+    background-color: {SUCCESS};
+    color: {SUCCESS_FOREGROUND};
+    border: none;
+}}
+QDialogButtonBox QPushButton[button-role="AcceptRole"]:hover,
+QDialogButtonBox QPushButton[button-role="YesRole"]:hover,
+QMessageBox QPushButton[button-role="AcceptRole"]:hover,
+QMessageBox QPushButton[button-role="YesRole"]:hover {{
+    background-color: #16a34a; /* Tailwind green-600, dark theme SUCCESS color */
+}}
+
+/* Negative: Cancel */
+QDialogButtonBox QPushButton[button-role="RejectRole"],
+QMessageBox QPushButton[button-role="RejectRole"] {{
+    background-color: {SECONDARY};
+    color: {SECONDARY_FOREGROUND};
+    border: 1px solid {BORDER};
+}}
+QDialogButtonBox QPushButton[button-role="RejectRole"]:hover,
+QMessageBox QPushButton[button-role="RejectRole"]:hover {{
+    background-color: {HOVER};
+}}
+
+/* Flat Negative: No */
+QDialogButtonBox QPushButton[button-role="NoRole"],
+QMessageBox QPushButton[button-role="NoRole"] {{
+    background-color: transparent;
+    color: {MUTED_FOREGROUND};
+    border: none;
+}}
+QDialogButtonBox QPushButton[button-role="NoRole"]:hover,
+QMessageBox QPushButton[button-role="NoRole"]:hover {{
+    background-color: {HOVER};
+    color: {SECONDARY_FOREGROUND};
+}}
+
+/* Destructive: Delete, Discard */
+QDialogButtonBox QPushButton[button-role="DestructiveRole"],
+QMessageBox QPushButton[button-role="DestructiveRole"] {{
+    background-color: {DESTRUCTIVE};
+    color: {DESTRUCTIVE_FOREGROUND};
+    border: none;
+}}
+QDialogButtonBox QPushButton[button-role="DestructiveRole"]:hover,
+QMessageBox QPushButton[button-role="DestructiveRole"]:hover {{
+    background-color: #b91c1c; /* Darker red for hover */
 }}
 
 /* Tooltip - Enhanced */

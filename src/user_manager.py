@@ -89,30 +89,13 @@ class UserManager(QtCore.QObject):
             if verify_user(username, password):
                 user_details = get_user_details(username)
                 if user_details:
-                    self._current_user = user_details
-                    # Mock token generation and rotation
-                    token_data = self._generate_mock_token_data()
-                    self._current_user["token"] = token_data["token"]
-                    self._current_user["token_expires_at"] = token_data["expires_at"]
-                    if remember_me:
-                        self.settings.setValue("session/username", username)
-                        self.settings.setValue("session/token", _xor_encrypt_decrypt(self._current_user["token"]))
-                        self.settings.setValue("session/token_expires_at", self._current_user["token_expires_at"].toString(QtCore.Qt.ISODate))
-                        # Store timestamp for session expiration
-                        self.settings.setValue("session/timestamp", QtCore.QDateTime.currentDateTime().toString(QtCore.Qt.ISODate))
-                        self.settings.sync()
-                    else:
-                        self.settings.remove("session/username")
-                        self.settings.remove("session/token")
-                        self.settings.remove("session/token_expires_at")
-                        self.settings.remove("session/timestamp")
-                        self.settings.sync()
-                    self.user_logged_in.emit(username, user_details["role"])
-                    return AuthResult.SUCCESS, user_details["role"]
+                    # Return user_details on success, don't modify state here
+                    return AuthResult.SUCCESS, user_details
             return AuthResult.INVALID_CREDENTIALS, None
-        
+
         worker = Worker(_login_task)
-        worker.signals.result.connect(lambda result: self._login_result_handler(result, username))
+        # Pass remember_me to the result handler
+        worker.signals.result.connect(lambda result: self._login_result_handler(result, username, remember_me))
         worker.signals.error.connect(lambda exctype, value, tb: self._login_error_handler(exctype, value, tb, username))
         worker.signals.finished.connect(lambda: print("Login task finished."))
         self.threadpool.start(worker)
@@ -123,11 +106,36 @@ class UserManager(QtCore.QObject):
         print(''.join(traceback.format_exception(exctype, value, tb)))
         self.login_completed.emit(AuthResult.SERVER_ERROR, username, None)
 
-    def _login_result_handler(self, result_tuple, username):
-        auth_result, role = result_tuple
+    def _login_result_handler(self, result_tuple, username, remember_me):
+        auth_result, data = result_tuple # data is user_details or None
+
         if auth_result == AuthResult.SUCCESS:
-            self.intended_destination = None # Clear intended destination on successful login
-            self.login_completed.emit(auth_result, username, role)
+            # All state modifications happen here, on the main thread
+            user_details = data
+            self._current_user = user_details
+
+            # Mock token generation and rotation
+            token_data = self._generate_mock_token_data()
+            self._current_user["token"] = token_data["token"]
+            self._current_user["token_expires_at"] = token_data["expires_at"]
+
+            if remember_me:
+                self.settings.setValue("session/username", username)
+                self.settings.setValue("session/token", _xor_encrypt_decrypt(self._current_user["token"]))
+                self.settings.setValue("session/token_expires_at", self._current_user["token_expires_at"].toString(QtCore.Qt.ISODate))
+                self.settings.setValue("session/timestamp", QtCore.QDateTime.currentDateTime().toString(QtCore.Qt.ISODate))
+                self.settings.sync()
+            else:
+                self.settings.remove("session/username")
+                self.settings.remove("session/token")
+                self.settings.remove("session/token_expires_at")
+                self.settings.remove("session/timestamp")
+                self.settings.sync()
+
+            # Emit signals from the main thread
+            self.user_logged_in.emit(username, user_details["role"])
+            self.intended_destination = None
+            self.login_completed.emit(auth_result, username, user_details["role"])
         else:
             self.login_completed.emit(auth_result, username, None)
 

@@ -278,6 +278,8 @@ class ReceiverManagement(QWidget):
             success, msg = delete_receiver_address(address_id)
             if success:
                 self.populate_address_table(self.current_receiver_id)
+                self.load_receivers_to_table()
+                self.receivers_table_widget.select_row_by_id(self.current_receiver_id)
                 self.address_form_widget.hide()
             else:
                 QMessageBox.warning(self, "Error", msg)
@@ -298,6 +300,8 @@ class ReceiverManagement(QWidget):
 
         if success:
             self.populate_address_table(self.current_receiver_id)
+            self.load_receivers_to_table()
+            self.receivers_table_widget.select_row_by_id(self.current_receiver_id)
             self.address_form_widget.hide()
         else:
             QMessageBox.warning(self, "Database Error", msg)
