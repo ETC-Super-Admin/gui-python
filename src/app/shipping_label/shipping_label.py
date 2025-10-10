@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSplitter, QFrame, QGroupBox, 
-    QFormLayout, QComboBox, QLineEdit, QPushButton
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSplitter, QFrame, QGroupBox,
+    QFormLayout, QComboBox, QLineEdit, QPushButton, QSizePolicy, QMessageBox
 )
 from PySide6.QtCore import Qt
 
@@ -8,9 +8,11 @@ from PySide6.QtCore import Qt
 from src.components.custom_spinbox import CustomSpinBox
 from src.components.flow_layout import FlowLayout
 from src.app.shipping_label.components.receiver_table_view import ReceiverTableView
+from src.app.shipping_label.components.label_preview import LabelPreview
 from src.db.receiver_queries import get_all_receiver_identities, get_addresses_for_receiver, get_receiver_identity_by_id
 from src.db.sender_queries import get_all_senders
 from src.db.config_queries import get_config
+from src.utils.widget_to_pdf import save_widget_as_pdf
 import qtawesome as qta
 
 class ShippingLabel(QWidget):
@@ -24,6 +26,7 @@ class ShippingLabel(QWidget):
         main_layout.setSpacing(12)
 
         # --- Left Side (Live View) ---
+        self.label_preview = LabelPreview()
         left_container = self._create_live_view_panel()
 
         # --- Right Side (Management with Splitter) ---
@@ -57,17 +60,17 @@ class ShippingLabel(QWidget):
         # Connect signals and load initial data
         self.receiver_list_view.receiver_selected.connect(self.on_receiver_selected)
         self.sender_combo.currentIndexChanged.connect(self.on_sender_selected)
+        self.copies_spinbox.valueChanged.connect(self.on_copies_changed)
         self.load_receiver_data()
         self.load_sender_data()
 
     def _create_live_view_panel(self):
+        # Main container that centers the label
         container = QFrame()
         container.setObjectName("Card")
-        layout = QVBoxLayout(container)
-        layout.setAlignment(Qt.AlignCenter)
-        label = QLabel("Shipping Label Live View")
-        label.setStyleSheet("font-size: 18px; color: #94a3b8;")
-        layout.addWidget(label)
+        container_layout = QVBoxLayout(container)
+        container_layout.setAlignment(Qt.AlignCenter)
+        container_layout.addWidget(self.label_preview)
         return container
 
     def _create_management_panel_2(self):
@@ -141,6 +144,7 @@ class ShippingLabel(QWidget):
         page_setup_btn.setObjectName("PageSetupButton")
         save_pdf_btn = QPushButton(qta.icon('fa5s.file-pdf', color='white'), " Save as PDF")
         save_pdf_btn.setObjectName("SavePdfButton")
+        save_pdf_btn.clicked.connect(self.save_label_as_pdf)
         print_btn = QPushButton(qta.icon('fa5s.print', color='white'), " Print")
         print_btn.setObjectName("PrintButton")
         
@@ -156,6 +160,17 @@ class ShippingLabel(QWidget):
 
         main_v_layout.addStretch()
         return container
+
+    def save_label_as_pdf(self):
+        if not self.receiver_name_input.text():
+            QMessageBox.warning(self, "Missing Data", "Please select a receiver before saving to PDF.")
+            return
+
+        copies = self.copies_spinbox.value()
+        save_widget_as_pdf(self, self.label_preview, copies)
+
+    def on_copies_changed(self, value):
+        self.label_preview.update_copy_count(value)
 
     def load_receiver_data(self):
         receivers = get_all_receiver_identities()
@@ -185,6 +200,8 @@ class ShippingLabel(QWidget):
                 self.receiver_name_input.clear()
                 self.receiver_tel_input.clear()
                 self.receiver_address_input.clear()
+                # Clear live view
+                self.label_preview.update_receiver_info("Receiver not found", "", "")
                 return
 
             # Populate name and tel from the identity data
@@ -195,30 +212,66 @@ class ShippingLabel(QWidget):
             addresses = get_addresses_for_receiver(receiver_id)
             if not addresses:
                 self.receiver_address_input.clear()
+                # Clear live view address part
+                self.label_preview.update_receiver_info(
+                    identity.get("name", "N/A"),
+                    "No address found for this receiver.",
+                    identity.get('tel', 'N/A')
+                )
                 return
 
             # Find the default address or use the first one
             default_address = next((addr for addr in addresses if addr.get('is_default')), addresses[0])
             
-            full_address = f"{default_address.get('address_detail', '')}, {default_address.get('sub_district', '')}, {default_address.get('district', '')}, {default_address.get('province', '')} {default_address.get('post_code', '')}"
+            full_address = (
+                f"{default_address.get('address_detail', '')} "
+                f"ต.{default_address.get('sub_district', '')} "
+                f"อ.{default_address.get('district', '')} "
+                f"จ.{default_address.get('province', '')} "
+                f"{default_address.get('post_code', '')}"
+            )
             self.receiver_address_input.setText(full_address)
+
+            # Update live view
+            self.label_preview.update_receiver_info(
+                identity.get("name", "N/A"),
+                full_address,
+                identity.get('tel', 'N/A')
+            )
         else:
             self.receiver_name_input.clear()
             self.receiver_tel_input.clear()
             self.receiver_address_input.clear()
+            # Clear live view
+            self.label_preview.clear_receiver_info()
 
     def on_sender_selected(self, index):
         if index < 0 or not self.senders_data:
+            self.label_preview.clear_sender_info()
             return
         
         sender = self.senders_data[index]
         self.sender_name_input.setText(sender.get('name', ''))
         self.sender_tel_input.setText(sender.get('tel', ''))
-        full_address = f"{sender.get('address_detail', '')}, {sender.get('sub_district', '')}, {sender.get('district', '')}, {sender.get('province', '')} {sender.get('post_code', '')}"
+        full_address = (
+            f"{sender.get('address_detail', '')} "
+            f"ต.{sender.get('sub_district', '')} "
+            f"อ.{sender.get('district', '')} "
+            f"จ.{sender.get('province', '')} "
+            f"{sender.get('post_code', '')}"
+        )
         self.sender_address_input.setText(full_address)
+
+        # Update live view
+        self.label_preview.update_sender_info(
+            full_address,
+            sender.get('tel', 'N/A')
+        )
 
     def showEvent(self, event):
         super().showEvent(event)
         if self.isVisible():
             self.load_receiver_data()
             self.load_sender_data()
+            self.label_preview.refresh_assets()
+

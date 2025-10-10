@@ -4,3 +4,4 @@ werkzeug
 matplotlib
 python-dotenv
 openpyxl
+reportlab

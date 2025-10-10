@@ -1,9 +1,11 @@
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QLineEdit
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIntValidator
 import qtawesome as qta
 
 class CustomSpinBox(QWidget):
+    valueChanged = Signal(int)
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("CustomSpinBox")
@@ -40,8 +42,10 @@ class CustomSpinBox(QWidget):
 
     def setValue(self, value):
         if self._minimum <= value <= self._maximum:
+            if self._value == value: return
             self._value = value
             self.line_edit.setText(str(self._value))
+            self.valueChanged.emit(self._value)
 
     def setMinimum(self, value):
         self._minimum = value
@@ -65,4 +69,6 @@ class CustomSpinBox(QWidget):
         if text and text.isdigit():
             val = int(text)
             if self._minimum <= val <= self._maximum:
-                self._value = val
+                if self._value != val:
+                    self._value = val
+                    self.valueChanged.emit(self._value)

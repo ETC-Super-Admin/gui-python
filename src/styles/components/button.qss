@@ -3,6 +3,7 @@ QPushButton {{
     background-color: {PRIMARY};
     color: {PRIMARY_FOREGROUND};
     border: none;
+    outline: none; /* Remove focus outline */
     border-radius: 6px;
     padding: 8px 16px;
     font-weight: 500;
