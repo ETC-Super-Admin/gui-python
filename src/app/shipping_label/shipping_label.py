@@ -197,7 +197,7 @@ class ShippingLabel(QWidget):
         page_setup(self, self.printer)
 
     def handle_direct_print(self):
-        direct_print(self, self.label_preview, self.printer)
+        direct_print(self, self.label_preview, self.printer, self.copies_spinbox.value())
 
     def save_label_as_pdf(self):
         if not self.receiver_name_input.text():
