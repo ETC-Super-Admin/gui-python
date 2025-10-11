@@ -31,14 +31,14 @@ class LabelPreview(QFrame):
         main_layout.setContentsMargins(20, 20, 20, 20)
         main_layout.setSpacing(15)
 
-        sender_info_widget = self._create_label_section("FROM", "sender")
+        sender_info_widget = self._create_label_section("ผู้ส่ง", "sender")
         
         separator = QFrame()
         separator.setFrameShape(QFrame.VLine)
         separator.setFrameShadow(QFrame.Sunken)
         separator.setStyleSheet("color: #e2e8f0;")
 
-        receiver_info_widget = self._create_label_section("TO", "receiver")
+        receiver_info_widget = self._create_label_section("ผู้รับ", "receiver")
 
         main_layout.addWidget(sender_info_widget, 4)
         main_layout.addWidget(separator)
@@ -71,17 +71,24 @@ class LabelPreview(QFrame):
             setattr(self, f"{prefix}_name_label", name_label)
             section_layout.addWidget(name_label)
 
-        address_label = QLabel("Full address will appear here")
+        address_label = QLabel("<b>ที่อยู่:</b> Full address will appear here")
         address_label.setWordWrap(True)
         address_label.setStyleSheet("font-size: 14px; color: #334155;")
         setattr(self, f"{prefix}_address_label", address_label)
         section_layout.addWidget(address_label)
 
-        tel_label = QLabel("Tel: ...")
+        tel_label = QLabel("โทร: ...")
         tel_label.setWordWrap(True)
         tel_label.setStyleSheet("font-size: 14px; color: #334155; font-weight: bold;")
         setattr(self, f"{prefix}_tel_label", tel_label)
         section_layout.addWidget(tel_label)
+
+        if prefix == "receiver":
+            delivery_by_label = QLabel("ขนส่งโดย: ...")
+            delivery_by_label.setWordWrap(True)
+            delivery_by_label.setStyleSheet("font-size: 14px; color: #334155; font-weight: bold;")
+            setattr(self, f"{prefix}_delivery_by_label", delivery_by_label)
+            section_layout.addWidget(delivery_by_label)
 
         section_layout.addStretch()
 
@@ -122,13 +129,15 @@ class LabelPreview(QFrame):
         self.load_and_display_assets()
 
     def update_sender_info(self, address, tel):
-        self.sender_address_label.setText(address or "")
-        self.sender_tel_label.setText(f"Tel: {tel or 'N/A'}")
+        self.sender_address_label.setText(f"<b>ที่อยู่:</b> {address or ''}")
+        self.sender_tel_label.setText(f"โทร: {tel or 'N/A'}")
 
-    def update_receiver_info(self, name, address, tel):
+    def update_receiver_info(self, name, address, tel, delivery_by):
         self.receiver_name_label.setText(name or "N/A")
-        self.receiver_address_label.setText(address or "")
-        self.receiver_tel_label.setText(f"Tel: {tel or 'N/A'}")
+        self.receiver_address_label.setText(f"<b>ที่อยู่:</b> {address or ''}")
+        self.receiver_tel_label.setText(f"โทร: {tel or 'N/A'}")
+        if hasattr(self, 'receiver_delivery_by_label'):
+            self.receiver_delivery_by_label.setText(f"ขนส่งโดย: {delivery_by or 'N/A'}")
 
     def update_copy_count(self, total):
         self.copy_count_label.setText(f"1/{total}")
@@ -137,4 +146,4 @@ class LabelPreview(QFrame):
         self.update_sender_info("Select a sender", "")
 
     def clear_receiver_info(self):
-        self.update_receiver_info("TO", "Select a receiver from the list", "")
+        self.update_receiver_info("TO", "Select a receiver from the list", "", "")

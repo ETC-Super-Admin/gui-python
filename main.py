@@ -2,6 +2,7 @@ import sys
 import os
 from dotenv import load_dotenv
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog
+from PySide6.QtGui import QFontDatabase
 from src.app.layout import MainLayout
 from src.styles.theme_manager import ThemeManager
 from src.db.user_queries import initialize_db, add_user
@@ -33,6 +34,21 @@ class MainWindow(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
+
+    # Load custom fonts
+    fonts_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'public', 'Sarabun')
+    if os.path.exists(fonts_dir):
+        for font_file in os.listdir(fonts_dir):
+            if font_file.endswith('.ttf'):
+                font_path = os.path.join(fonts_dir, font_file)
+                font_id = QFontDatabase.addApplicationFont(font_path)
+                if font_id == -1:
+                    print(f"Warning: Failed to load font: {font_path}")
+                else:
+                    font_families = QFontDatabase.applicationFontFamilies(font_id)
+                    if font_families:
+                        print(f"Successfully loaded font: {font_families[0]}")
+
     load_dotenv()
     initialize_db()
 

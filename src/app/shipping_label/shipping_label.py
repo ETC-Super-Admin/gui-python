@@ -64,8 +64,32 @@ class ShippingLabel(QWidget):
         self.receiver_list_view.receiver_selected.connect(self.on_receiver_selected)
         self.sender_combo.currentIndexChanged.connect(self.on_sender_selected)
         self.copies_spinbox.valueChanged.connect(self.on_copies_changed)
+
+        # Connect text changed signals for live preview update
+        self.sender_name_input.textChanged.connect(self._update_preview_from_inputs)
+        self.sender_tel_input.textChanged.connect(self._update_preview_from_inputs)
+        self.sender_address_input.textChanged.connect(self._update_preview_from_inputs)
+        self.receiver_name_input.textChanged.connect(self._update_preview_from_inputs)
+        self.receiver_tel_input.textChanged.connect(self._update_preview_from_inputs)
+        self.receiver_address_input.textChanged.connect(self._update_preview_from_inputs)
+        self.receiver_delivery_by_input.textChanged.connect(self._update_preview_from_inputs)
+
         self.load_receiver_data()
         self.load_sender_data()
+
+    def _update_preview_from_inputs(self):
+        # Update sender info
+        self.label_preview.update_sender_info(
+            self.sender_address_input.text(),
+            self.sender_tel_input.text()
+        )
+        # Update receiver info
+        self.label_preview.update_receiver_info(
+            self.receiver_name_input.text(),
+            self.receiver_address_input.text(),
+            self.receiver_tel_input.text(),
+            self.receiver_delivery_by_input.text()
+        )
 
     def _create_live_view_panel(self):
         # Main container that centers the label
@@ -114,6 +138,7 @@ class ShippingLabel(QWidget):
         self.receiver_name_input = QLineEdit()
         self.receiver_tel_input = QLineEdit()
         self.receiver_address_input = QLineEdit()
+        self.receiver_delivery_by_input = QLineEdit()
 
         to_layout.addWidget(QLabel("Name:"))
         to_layout.addWidget(self.receiver_name_input)
@@ -121,6 +146,8 @@ class ShippingLabel(QWidget):
         to_layout.addWidget(self.receiver_tel_input)
         to_layout.addWidget(QLabel("Address:"))
         to_layout.addWidget(self.receiver_address_input)
+        to_layout.addWidget(QLabel("Delivery by:"))
+        to_layout.addWidget(self.receiver_delivery_by_input)
         to_layout.addStretch()
         main_v_layout.addWidget(to_group)
 
@@ -212,7 +239,7 @@ class ShippingLabel(QWidget):
                 self.receiver_tel_input.clear()
                 self.receiver_address_input.clear()
                 # Clear live view
-                self.label_preview.update_receiver_info("Receiver not found", "", "")
+                self.label_preview.update_receiver_info("Receiver not found", "", "", "")
                 return
 
             # Populate name and tel from the identity data
@@ -227,7 +254,8 @@ class ShippingLabel(QWidget):
                 self.label_preview.update_receiver_info(
                     identity.get("name", "N/A"),
                     "No address found for this receiver.",
-                    identity.get('tel', 'N/A')
+                    identity.get('tel', 'N/A'),
+                    ""
                 )
                 return
 
@@ -247,12 +275,15 @@ class ShippingLabel(QWidget):
             self.label_preview.update_receiver_info(
                 identity.get("name", "N/A"),
                 full_address,
-                identity.get('tel', 'N/A')
+                identity.get('tel', 'N/A'),
+                default_address.get('delivery_by', 'N/A')
             )
+            self.receiver_delivery_by_input.setText(default_address.get('delivery_by', 'N/A'))
         else:
             self.receiver_name_input.clear()
             self.receiver_tel_input.clear()
             self.receiver_address_input.clear()
+            self.receiver_delivery_by_input.clear()
             # Clear live view
             self.label_preview.clear_receiver_info()
 

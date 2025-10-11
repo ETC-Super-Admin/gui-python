@@ -73,6 +73,9 @@ def save_widget_as_pdf(parent_widget, label_preview_widget, copies=1):
         receiver_name = label_preview_widget.receiver_name_label.text()
         receiver_address = label_preview_widget.receiver_address_label.text()
         receiver_tel = label_preview_widget.receiver_tel_label.text()
+        receiver_delivery_by = ""
+        if hasattr(label_preview_widget, 'receiver_delivery_by_label'):
+            receiver_delivery_by = label_preview_widget.receiver_delivery_by_label.text()
 
         sender_logo_path = get_config("asset_sender_logo", "")
         receiver_logo_path = get_config("asset_receiver_logo", "")
@@ -81,7 +84,7 @@ def save_widget_as_pdf(parent_widget, label_preview_widget, copies=1):
             draw_label_page(c, page_width, page_height,
                             sender_logo_path, sender_address, sender_tel,
                             receiver_logo_path, receiver_name, receiver_address, receiver_tel,
-                            f"{i + 1}/{copies}")
+                            receiver_delivery_by, f"{i + 1}/{copies}")
             if i < copies - 1:
                 c.showPage()
 
@@ -95,7 +98,7 @@ def save_widget_as_pdf(parent_widget, label_preview_widget, copies=1):
 def draw_label_page(c, page_width, page_height,
                     sender_logo_path, sender_address, sender_tel,
                     receiver_logo_path, receiver_name, receiver_address, receiver_tel,
-                    copy_text):
+                    receiver_delivery_by, copy_text):
     
     # --- Define Layout & Style Constants ---
     margin = 5 * mm
@@ -109,7 +112,7 @@ def draw_label_page(c, page_width, page_height,
     # --- Define Styles ---
     styles = getSampleStyleSheet()
     title_style = ParagraphStyle('title', parent=styles['Normal'], fontName=FONT_FAMILY_BOLD, fontSize=10.5, textColor=HexColor("#64748b"))
-    address_style = ParagraphStyle('address', parent=styles['Normal'], fontName=FONT_FAMILY, fontSize=10.5, leading=14, textColor=HexColor("#334155"))
+    address_style = ParagraphStyle('address', parent=styles['Normal'], fontName=FONT_FAMILY, fontSize=10.5, leading=16, textColor=HexColor("#334155"))
     tel_style = ParagraphStyle('tel', parent=address_style, fontName=FONT_FAMILY_BOLD)
     receiver_name_style = ParagraphStyle('receiver_name', parent=styles['Normal'], fontName=FONT_FAMILY_BOLD, fontSize=12, textColor=HexColor("#000000"))
 
@@ -124,12 +127,12 @@ def draw_label_page(c, page_width, page_height,
             print(f"Could not draw sender image: {e}")
     
     sender_story.append(Spacer(1, 2.5 * mm))
-    sender_story.append(Paragraph("FROM", title_style))
+    sender_story.append(Paragraph("ผู้ส่ง", title_style))
     sender_story.append(Spacer(1, 0.5 * mm))
     sender_story.append(Line(sender_col_width - (4*mm), color=HexColor("#e2e8f0")))
     sender_story.append(Spacer(1, 2.5 * mm))
     sender_story.append(Paragraph(sender_address.replace("\n", "<br/>"), address_style))
-    sender_story.append(Spacer(1, 1.5 * mm))
+    sender_story.append(Spacer(1, 2.5 * mm))
     sender_story.append(Paragraph(sender_tel, tel_style))
 
     # --- Build Receiver Story (Right Column) ---
@@ -145,15 +148,17 @@ def draw_label_page(c, page_width, page_height,
             print(f"Could not draw receiver image: {e}")
 
     receiver_story.append(Spacer(1, 2.5 * mm))
-    receiver_story.append(Paragraph("TO", title_style))
+    receiver_story.append(Paragraph("ผู้รับ", title_style))
     receiver_story.append(Spacer(1, 0.5 * mm))
     receiver_story.append(Line(receiver_col_width - (4*mm), color=HexColor("#e2e8f0")))
     receiver_story.append(Spacer(1, 2.5 * mm))
     receiver_story.append(Paragraph(receiver_name, receiver_name_style))
-    receiver_story.append(Spacer(1, 1.5 * mm))
+    receiver_story.append(Spacer(1, 3.5 * mm))
     receiver_story.append(Paragraph(receiver_address.replace("\n", "<br/>"), address_style))
-    receiver_story.append(Spacer(1, 1.5 * mm))
+    receiver_story.append(Spacer(1, 2.5 * mm))
     receiver_story.append(Paragraph(receiver_tel, tel_style))
+    receiver_story.append(Spacer(1, 2.5 * mm))
+    receiver_story.append(Paragraph(receiver_delivery_by, tel_style))
 
     # --- Create Frames and Draw Stories ---
     frame_height = content_height - (5*mm) # Reserve space at bottom for copy count
