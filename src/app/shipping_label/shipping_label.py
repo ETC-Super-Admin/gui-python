@@ -73,6 +73,7 @@ class ShippingLabel(QWidget):
         self.receiver_tel_input.textChanged.connect(self._update_preview_from_inputs)
         self.receiver_address_input.textChanged.connect(self._update_preview_from_inputs)
         self.receiver_delivery_by_input.textChanged.connect(self._update_preview_from_inputs)
+        self.receiver_note_input.textChanged.connect(self._update_preview_from_inputs)
 
         self.load_receiver_data()
         self.load_sender_data()
@@ -88,7 +89,8 @@ class ShippingLabel(QWidget):
             self.receiver_name_input.text(),
             self.receiver_address_input.text(),
             self.receiver_tel_input.text(),
-            self.receiver_delivery_by_input.text()
+            self.receiver_delivery_by_input.text(),
+            self.receiver_note_input.text()
         )
 
     def _create_live_view_panel(self):
@@ -148,6 +150,10 @@ class ShippingLabel(QWidget):
         to_layout.addWidget(self.receiver_address_input)
         to_layout.addWidget(QLabel("Delivery by:"))
         to_layout.addWidget(self.receiver_delivery_by_input)
+
+        self.receiver_note_input = QLineEdit()
+        to_layout.addWidget(QLabel("Note:"))
+        to_layout.addWidget(self.receiver_note_input)
         to_layout.addStretch()
         main_v_layout.addWidget(to_group)
 
@@ -276,14 +282,17 @@ class ShippingLabel(QWidget):
                 identity.get("name", "N/A"),
                 full_address,
                 identity.get('tel', 'N/A'),
-                default_address.get('delivery_by', 'N/A')
+                default_address.get('delivery_by', 'N/A'),
+                default_address.get('note', 'N/A')
             )
             self.receiver_delivery_by_input.setText(default_address.get('delivery_by', 'N/A'))
+            self.receiver_note_input.setText(default_address.get('note', ''))
         else:
             self.receiver_name_input.clear()
             self.receiver_tel_input.clear()
             self.receiver_address_input.clear()
             self.receiver_delivery_by_input.clear()
+            self.receiver_note_input.clear()
             # Clear live view
             self.label_preview.clear_receiver_info()
 

@@ -133,8 +133,8 @@ class ReceiverManagement(QWidget):
     def _create_address_table(self):
         table = QTableWidget()
         table.setAlternatingRowColors(True)
-        table.setColumnCount(10)
-        table.setHorizontalHeaderLabels(["ID", "Default", "Inventory", "Address", "Sub-district", "District", "Province", "Post Code", "Delivery By", "Zone"])
+        table.setColumnCount(11)
+        table.setHorizontalHeaderLabels(["ID", "Default", "Inventory", "Address", "Sub-district", "District", "Province", "Post Code", "Delivery By", "Zone", "Note"])
         table.setColumnHidden(0, True)
         header = table.horizontalHeader()
         header.setSectionResizeMode(3, QHeaderView.Stretch)
@@ -203,6 +203,7 @@ class ReceiverManagement(QWidget):
             self.address_table.setItem(row, 7, QTableWidgetItem(addr["post_code"]))
             self.address_table.setItem(row, 8, QTableWidgetItem(addr["delivery_by"]))
             self.address_table.setItem(row, 9, QTableWidgetItem(addr.get("zone", "")))
+            self.address_table.setItem(row, 10, QTableWidgetItem(addr.get("note", "")))
 
     def on_address_selected(self):
         selected = self.address_table.selectedItems()
@@ -315,7 +316,7 @@ class ReceiverManagement(QWidget):
                 QMessageBox.information(self, "Export", "There is no receiver data to export.")
                 return
 
-            headers = ["Name", "Tel", "Inventory", "Address Details", "Sub-district", "District", "Province", "Post Code", "Delivery By", "Zone"]
+            headers = ["Name", "Tel", "Inventory", "Address Details", "Sub-district", "District", "Province", "Post Code", "Delivery By", "Zone", "Note"]
             key_map = {
                 "Name": "name",
                 "Tel": "tel",
@@ -326,7 +327,8 @@ class ReceiverManagement(QWidget):
                 "Province": "province",
                 "Post Code": "post_code",
                 "Delivery By": "delivery_by",
-                "Zone": "zone"
+                "Zone": "zone",
+                "Note": "note"
             }
             
             settings = QSettings("ProAuto", "App")
@@ -396,7 +398,8 @@ class ReceiverManagement(QWidget):
                     'province': row_data.get('Province', ''),
                     'post_code': str(row_data.get('Post Code', '')),
                     'delivery_by': delivery_by,
-                    'zone': str(row_data.get('Zone', ''))
+                    'zone': str(row_data.get('Zone', '')),
+                    'note': str(row_data.get('Note', ''))
                 }
 
                 existing_address = find_exact_address(receiver_id, address_data['address_detail'], address_data['post_code'])

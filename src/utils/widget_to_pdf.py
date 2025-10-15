@@ -16,23 +16,15 @@ from reportlab.pdfbase.ttfonts import TTFont
 from src.db.config_queries import get_config
 
 # --- Font Setup ---
-FONT_FAMILY = "Helvetica"
-FONT_FAMILY_BOLD = "Helvetica-Bold"
-try:
-    fonts_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'public', 'Sarabun')
-    regular_font_path = os.path.join(fonts_dir, 'Sarabun-Regular.ttf')
-    bold_font_path = os.path.join(fonts_dir, 'Sarabun-Bold.ttf')
+FONT_FAMILY = "Tahoma"
+FONT_FAMILY_BOLD = "Tahoma-Bold"
 
-    if os.path.exists(regular_font_path) and os.path.exists(bold_font_path):
-        pdfmetrics.registerFont(TTFont('Sarabun-Regular', regular_font_path))
-        pdfmetrics.registerFont(TTFont('Sarabun-Bold', bold_font_path))
-        FONT_FAMILY = "Sarabun-Regular"
-        FONT_FAMILY_BOLD = "Sarabun-Bold"
-        print("Sarabun font successfully loaded for PDF generation.")
-    else:
-        print("Sarabun font not found in public/Sarabun. PDF will use Helvetica.")
-except Exception as e:
-    print(f"Could not load custom Sarabun font: {e}")
+# Register bold font for reportlab if available
+try:
+    pdfmetrics.registerFont(TTFont('Tahoma-Bold', 'tahomabd.ttf'))
+except:
+    # Fallback if bold font file is not found
+    pass
 
 class Line(Flowable):
     """A simple horizontal line flowable."""
@@ -76,6 +68,9 @@ def save_widget_as_pdf(parent_widget, label_preview_widget, copies=1):
         receiver_delivery_by = ""
         if hasattr(label_preview_widget, 'receiver_delivery_by_label'):
             receiver_delivery_by = label_preview_widget.receiver_delivery_by_label.text()
+        receiver_note = ""
+        if hasattr(label_preview_widget, 'receiver_note_label'):
+            receiver_note = label_preview_widget.receiver_note_label.text()
 
         sender_logo_path = get_config("asset_sender_logo", "")
         receiver_logo_path = get_config("asset_receiver_logo", "")
@@ -84,7 +79,7 @@ def save_widget_as_pdf(parent_widget, label_preview_widget, copies=1):
             draw_label_page(c, page_width, page_height,
                             sender_logo_path, sender_address, sender_tel,
                             receiver_logo_path, receiver_name, receiver_address, receiver_tel,
-                            receiver_delivery_by, f"{i + 1}/{copies}")
+                            receiver_delivery_by, f"{i + 1}/{copies}", receiver_note)
             if i < copies - 1:
                 c.showPage()
 
@@ -98,7 +93,7 @@ def save_widget_as_pdf(parent_widget, label_preview_widget, copies=1):
 def draw_label_page(c, page_width, page_height,
                     sender_logo_path, sender_address, sender_tel,
                     receiver_logo_path, receiver_name, receiver_address, receiver_tel,
-                    receiver_delivery_by, copy_text):
+                    receiver_delivery_by, copy_text, receiver_note=""):
     
     # --- Define Layout & Style Constants ---
     margin = 5 * mm
@@ -115,6 +110,7 @@ def draw_label_page(c, page_width, page_height,
     address_style = ParagraphStyle('address', parent=styles['Normal'], fontName=FONT_FAMILY, fontSize=10.5, leading=16, textColor=HexColor("#334155"))
     tel_style = ParagraphStyle('tel', parent=address_style, fontName=FONT_FAMILY_BOLD)
     receiver_name_style = ParagraphStyle('receiver_name', parent=styles['Normal'], fontName=FONT_FAMILY_BOLD, fontSize=12, textColor=HexColor("#000000"))
+    note_style = ParagraphStyle('note', parent=styles['Normal'], fontName=FONT_FAMILY, fontSize=9.5, textColor=HexColor("#ef4444"), fontStyle='italic')
 
     # --- Build Sender Story (Left Column) ---
     sender_story = []
@@ -159,6 +155,9 @@ def draw_label_page(c, page_width, page_height,
     receiver_story.append(Paragraph(receiver_tel, tel_style))
     receiver_story.append(Spacer(1, 2.5 * mm))
     receiver_story.append(Paragraph(receiver_delivery_by, tel_style))
+    if receiver_note and receiver_note != "Note: ":
+        receiver_story.append(Spacer(1, 2.5 * mm))
+        receiver_story.append(Paragraph(receiver_note, note_style))
 
     # --- Create Frames and Draw Stories ---
     frame_height = content_height - (5*mm) # Reserve space at bottom for copy count

@@ -7,7 +7,7 @@ import os
 from src.db.config_queries import get_config
 
 # --- Font Setup ---
-FONT_FAMILY = "Sarabun"
+FONT_FAMILY = "Tahoma"
 FONT_FALLBACK = "Arial"
 
 def _get_font(point_size, bold=False):
@@ -79,6 +79,7 @@ def _draw_label_on_painter(painter, printer, widget, copy_text):
     receiver_address = widget.receiver_address_label.text()
     receiver_tel = widget.receiver_tel_label.text()
     receiver_delivery_by = widget.receiver_delivery_by_label.text() if hasattr(widget, 'receiver_delivery_by_label') else ""
+    receiver_note = widget.receiver_note_label.text() if hasattr(widget, 'receiver_note_label') else ""
     sender_pixmap = widget.sender_asset_label.pixmap()
     receiver_pixmap = widget.receiver_asset_label.pixmap()
 
@@ -146,7 +147,11 @@ def _draw_label_on_painter(painter, printer, widget, copy_text):
     current_y += doc.size().height() + mm_to_px(2.5)
 
     current_y = draw_plain_text(painter, current_y, receiver_rect, receiver_tel, _get_font(10.5, bold=True), QColor("#334155"), Qt.TextWordWrap, 2.5)
-    draw_plain_text(painter, current_y, receiver_rect, receiver_delivery_by, _get_font(10.5, bold=True), QColor("#334155"), Qt.TextWordWrap, 0)
+    current_y = draw_plain_text(painter, current_y, receiver_rect, receiver_delivery_by, _get_font(10.5, bold=True), QColor("#334155"), Qt.TextWordWrap, 2.5)
+    if receiver_note and receiver_note != "Note: ":
+        note_font = _get_font(9.5)
+        note_font.setItalic(True)
+        draw_plain_text(painter, current_y, receiver_rect, receiver_note, note_font, QColor("#ef4444"), Qt.TextWordWrap, 0)
 
     # --- 3. Draw Absolute-Positioned Elements ---
     painter.setPen(QColor("#e2e8f0"))

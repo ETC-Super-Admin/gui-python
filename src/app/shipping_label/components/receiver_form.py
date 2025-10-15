@@ -61,6 +61,10 @@ class ReceiverForm(QWidget):
         self.zone_input.setPlaceholderText("Enter zone (optional)")
         form_layout.addRow("Zone:", self.zone_input)
 
+        self.note_input = QLineEdit()
+        self.note_input.setPlaceholderText("Enter note (optional)")
+        form_layout.addRow("Note:", self.note_input)
+
         # --- Action Buttons ---
         form_action_layout = self._create_action_buttons()
         form_layout.addRow(form_action_layout)
@@ -232,6 +236,7 @@ class ReceiverForm(QWidget):
         self.delete_button.setVisible(False)
         self.address_detail_input.clear()
         self.zone_input.clear()
+        self.note_input.clear()
         
         default_code = get_config("bills_process_inventory_code")
         self.inventory_combo.setCurrentText(default_code if default_code else "")
@@ -258,6 +263,7 @@ class ReceiverForm(QWidget):
         self.postcode_input.setText(address_data.get("post_code", ""))
         self.delivery_by_combo.setCurrentText(address_data.get("delivery_by", ""))
         self.zone_input.setText(address_data.get("zone", ""))
+        self.note_input.setText(address_data.get("note", ""))
 
         province = address_data.get("province", "")
         self.initialize_address_dropdowns()
@@ -297,7 +303,8 @@ class ReceiverForm(QWidget):
             "address_detail": self.address_detail_input.text(),
             "post_code": self.postcode_input.text(),
             "delivery_by": self.delivery_by_combo.currentText(),
-            "zone": self.zone_input.text()
+            "zone": self.zone_input.text(),
+            "note": self.note_input.text()
         }
 
         is_address_filled = not any(s.startswith('Select') for s in [data["province"], data["district"], data["sub_district"]])

@@ -43,11 +43,25 @@ def initialize_receiver_db():
                 post_code TEXT NOT NULL,
                 delivery_by TEXT NOT NULL,
                 zone TEXT,
+                note TEXT,
                 is_default BOOLEAN DEFAULT 0,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (receiver_identity_id) REFERENCES receiver_identities (id) ON DELETE CASCADE
             )
         """)
+
+        # --- Schema Migration for 'note' column ---
+        cursor.execute("PRAGMA table_info(receiver_addresses)")
+        columns = [info[1] for info in cursor.fetchall()]
+        if 'note' not in columns:
+            try:
+                print("Migration required: Adding 'note' column to 'receiver_addresses' table...")
+                cursor.execute("ALTER TABLE receiver_addresses ADD COLUMN note TEXT")
+                print("Migration completed successfully.")
+                conn.commit()
+            except Exception as e:
+                print(f"Migration for 'note' column failed: {e}")
+                conn.rollback()
 
         if table_exists and not is_migrated:
             print("Migration required: Migrating 'receivers' table...")
@@ -112,11 +126,11 @@ def add_receiver_address(receiver_identity_id, data):
             cursor.execute("""
                 INSERT INTO receiver_addresses (
                     receiver_identity_id, inventory_code, address_detail, sub_district, 
-                    district, province, post_code, delivery_by, zone
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    district, province, post_code, delivery_by, zone, note
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 receiver_identity_id, data['inventory_code'], data['address_detail'], data['sub_district'],
-                data['district'], data['province'], data['post_code'], data['delivery_by'], data.get('zone')
+                data['district'], data['province'], data['post_code'], data['delivery_by'], data.get('zone'), data.get('note')
             ))
             conn.commit()
             return True, "Address added successfully."
@@ -167,14 +181,13 @@ def update_receiver_address(address_id, data):
     with sqlite3.connect(DATABASE_NAME) as conn:
         cursor = conn.cursor()
         try:
-            cursor.execute("""
-                UPDATE receiver_addresses SET
+            cursor.execute("""UPDATE receiver_addresses SET
                 inventory_code = ?, address_detail = ?, sub_district = ?, district = ?,
-                province = ?, post_code = ?, delivery_by = ?, zone = ?
+                province = ?, post_code = ?, delivery_by = ?, zone = ?, note = ?
                 WHERE id = ?
             """, (
                 data['inventory_code'], data['address_detail'], data['sub_district'], data['district'],
-                data['province'], data['post_code'], data['delivery_by'], data.get('zone'), address_id
+                data['province'], data['post_code'], data['delivery_by'], data.get('zone'), data.get('note'), address_id
             ))
             conn.commit()
             return True, "Address updated."
@@ -240,7 +253,8 @@ def get_all_receiver_addresses():
                 ra.province,
                 ra.post_code,
                 ra.delivery_by,
-                ra.zone
+                ra.zone,
+                ra.note
             FROM receiver_addresses ra
             JOIN receiver_identities ri ON ra.receiver_identity_id = ri.id
             ORDER BY ri.name, ra.created_at

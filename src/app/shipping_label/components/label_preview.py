@@ -90,6 +90,12 @@ class LabelPreview(QFrame):
             setattr(self, f"{prefix}_delivery_by_label", delivery_by_label)
             section_layout.addWidget(delivery_by_label)
 
+            note_label = QLabel("Note: ...")
+            note_label.setWordWrap(True)
+            note_label.setStyleSheet("font-size: 12px; color: #ef4444; font-style: italic;")
+            setattr(self, f"{prefix}_note_label", note_label)
+            section_layout.addWidget(note_label)
+
         section_layout.addStretch()
 
         if prefix == "sender":
@@ -132,12 +138,15 @@ class LabelPreview(QFrame):
         self.sender_address_label.setText(f"<b>ที่อยู่:</b> {address or ''}")
         self.sender_tel_label.setText(f"โทร: {tel or 'N/A'}")
 
-    def update_receiver_info(self, name, address, tel, delivery_by):
+    def update_receiver_info(self, name, address, tel, delivery_by, note):
         self.receiver_name_label.setText(name or "N/A")
         self.receiver_address_label.setText(f"<b>ที่อยู่:</b> {address or ''}")
         self.receiver_tel_label.setText(f"โทร: {tel or 'N/A'}")
         if hasattr(self, 'receiver_delivery_by_label'):
             self.receiver_delivery_by_label.setText(f"ขนส่งโดย: {delivery_by or 'N/A'}")
+        if hasattr(self, 'receiver_note_label'):
+            self.receiver_note_label.setText(f"Note: {note or ''}")
+            self.receiver_note_label.setVisible(bool(note))
 
     def update_copy_count(self, total):
         self.copy_count_label.setText(f"1/{total}")
@@ -146,4 +155,4 @@ class LabelPreview(QFrame):
         self.update_sender_info("Select a sender", "")
 
     def clear_receiver_info(self):
-        self.update_receiver_info("TO", "Select a receiver from the list", "", "")
+        self.update_receiver_info("TO", "Select a receiver from the list", "", "", "")
