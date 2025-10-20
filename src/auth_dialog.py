@@ -17,9 +17,9 @@ class LoginDialog(QDialog):
         self.setFixedSize(380, 420) # Increase size for better spacing
 
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(30, 30, 30, 30) # Add padding
+        main_layout.setContentsMargins(12, 12, 12, 12) # Add padding
         main_layout.setAlignment(Qt.AlignCenter)
-        main_layout.setSpacing(12)
+        main_layout.setSpacing(16)
 
         # Branding/Logo Area
         logo_label = QLabel("ProAuto")
@@ -29,7 +29,7 @@ class LoginDialog(QDialog):
         main_layout.addWidget(logo_label)
 
         # Spacer after logo
-        main_layout.addSpacing(15)
+        main_layout.addSpacing(10)
 
         def validate_username(text):
             if len(text) < 3:
