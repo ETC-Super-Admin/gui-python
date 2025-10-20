@@ -120,3 +120,50 @@ QPushButton:disabled {{
     background-color: #16a34a; /* Tailwind green-600 */
 }}
 
+/* Outline Button Style */
+#OutlineButton {{
+    background-color: transparent;
+    color: {PRIMARY};
+    border: 1px solid {PRIMARY};
+}}
+
+#OutlineButton:hover {{
+    background-color: {HOVER};
+}}
+
+#OutlineButton:pressed {{
+    background-color: {SECONDARY};
+}}
+
+/* Success Button Style */
+#SuccessButton {{
+    background-color: {SUCCESS};
+    color: {SUCCESS_FOREGROUND};
+}}
+#SuccessButton:hover {{
+    background-color: #16a34a; /* Darker green */
+}}
+
+/* Success Outline Button Style */
+#SuccessOutlineButton {{
+    background-color: transparent;
+    color: {SUCCESS};
+    border: 1px solid {SUCCESS};
+}}
+
+#SuccessOutlineButton:hover {{
+    background-color: {HOVER};
+}}
+
+#SuccessOutlineButton:pressed {{
+    background-color: {SECONDARY};
+}}
+
+/* Warning Button Style */
+#WarningButton {{
+    background-color: {WARNING};
+    color: {WARNING_FOREGROUND};
+}}
+#WarningButton:hover {{
+    background-color: #d97706; /* Darker amber */
+}}

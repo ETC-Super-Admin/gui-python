@@ -1,6 +1,9 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QDateEdit, QGroupBox, QTextEdit, QSizePolicy
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QDateEdit, QGroupBox, QTextEdit, QSizePolicy, QToolButton
+from PySide6.QtGui import QIcon
 from PySide6.QtCore import QDate, Qt, QThreadPool
 import qtawesome as qta
+import os
+
 
 from src.components.async_worker import Worker
 from .core.orchestrator import Orchestrator
@@ -50,29 +53,46 @@ class BillsProcess(QWidget):
         self.date_select = QDateEdit(QDate.currentDate())
         self.date_select.setCalendarPopup(True)
         self.date_select.setFixedHeight(35)
+
+        # Programmatically set the icon for the calendar popup button
+        try:
+            down_arrow_button = self.date_select.findChild(QToolButton)
+            if down_arrow_button:
+                # Construct absolute path to the icon for robustness
+                script_dir = os.path.dirname(os.path.abspath(__file__))
+                icon_path = os.path.join(script_dir, '..', '..', '..', 'public', 'calendar.svg')
+                if os.path.exists(icon_path):
+                    down_arrow_button.setIcon(QIcon(icon_path))
+                    down_arrow_button.setStyleSheet("border: none; padding: 0px;")
+                else:
+                    print(f"Calendar icon not found at: {icon_path}")
+        except Exception as e:
+            print(f"Could not set calendar icon: {e}")
+
         actions_layout.addWidget(self.date_select)
         actions_layout.addSpacing(15)
 
         self.process_button = self.create_action_button(
-            "Process Files", 'fa5s.cogs', "SaveUserButton"
+            "Process Files", 'fa5s.cogs', "SuccessButton"
         )
         self.unmerge_button = self.create_action_button(
-            "Unmerge Daily Files", 'fa5s.th-large'
+            "Unmerge Daily Files", 'fa5s.th-large', "SuccessOutlineButton", icon_color='#22c55e'
         )
         self.rearrange_button = self.create_action_button(
-            "Rearrange Rows", 'fa5s.sort-amount-down'
+            "Rearrange Rows", 'fa5s.sort-amount-down', "WarningButton"
         )
         self.update_formulas_button = self.create_action_button(
-            "Update Formulas", 'fa5s.calculator'
+            "Update Formulas", 'fa5s.calculator', "SuccessOutlineButton", icon_color='#22c55e'
         )
         self.open_report_button = self.create_action_button(
             "Open Monthly Report", 'fa5s.folder-open'
         )
 
-        actions_layout.addWidget(self.process_button)
         actions_layout.addWidget(self.unmerge_button)
-        actions_layout.addWidget(self.rearrange_button)
+        actions_layout.addWidget(self.process_button)
         actions_layout.addWidget(self.update_formulas_button)
+        actions_layout.addSpacing(20)
+        actions_layout.addWidget(self.rearrange_button)
         actions_layout.addWidget(self.open_report_button)
         actions_layout.addStretch()
         
@@ -84,10 +104,10 @@ class BillsProcess(QWidget):
         danger_group.setObjectName("Card")
         danger_layout = QVBoxLayout(danger_group)
         
-        self.clear_cache_button = self.create_action_button(
-            "Clear Cache", 'fa5s.trash-alt', "DeleteUserButton"
+        self.clear_unmerge_cache_button = self.create_action_button(
+            "Clear Unmerge Cache", 'fa5s.trash-alt', "DeleteUserButton"
         )
-        danger_layout.addWidget(self.clear_cache_button)
+        danger_layout.addWidget(self.clear_unmerge_cache_button)
         
         right_layout.addWidget(danger_group)
 
@@ -98,8 +118,8 @@ class BillsProcess(QWidget):
         main_layout.addWidget(left_widget, 7)
         main_layout.addWidget(right_widget, 3)
 
-    def create_action_button(self, text, icon_name, object_name=None):
-        button = QPushButton(qta.icon(icon_name, color='white'), f" {text}")
+    def create_action_button(self, text, icon_name, object_name=None, icon_color='white'):
+        button = QPushButton(qta.icon(icon_name, color=icon_color), f" {text}")
         if object_name:
             button.setObjectName(object_name)
         return button
@@ -110,7 +130,7 @@ class BillsProcess(QWidget):
         self.rearrange_button.clicked.connect(self.on_rearrange_rows)
         self.update_formulas_button.clicked.connect(self.on_update_formulas)
         self.open_report_button.clicked.connect(self.on_open_report)
-        self.clear_cache_button.clicked.connect(self.on_clear_cache)
+        self.clear_unmerge_cache_button.clicked.connect(self.on_clear_unmerge_cache)
         self.date_select.dateChanged.connect(self.on_date_changed)
 
     def on_process_files(self):
@@ -121,7 +141,7 @@ class BillsProcess(QWidget):
 
         date = self.date_select.date()
         
-        def task():
+        def task(**kwargs):
             orchestrator = Orchestrator(date)
             return orchestrator.run_process_files()
 
@@ -138,8 +158,19 @@ class BillsProcess(QWidget):
     def _on_processing_error(self, error_tuple):
         exctype, value, traceback_str = error_tuple
         self.log_display.append(f"\n--- CRITICAL ERROR ---\n{value}\n\n{traceback_str}")
+        # Reset all buttons that could have been disabled
         self.process_button.setEnabled(True)
         self.process_button.setText(" Process Files")
+        self.unmerge_button.setEnabled(True)
+        self.unmerge_button.setText(" Unmerge Daily Files")
+        self.rearrange_button.setEnabled(True)
+        self.rearrange_button.setText(" Rearrange Rows")
+        self.update_formulas_button.setEnabled(True)
+        self.update_formulas_button.setText(" Update Formulas")
+        self.open_report_button.setEnabled(True)
+        self.open_report_button.setText(" Open Monthly Report")
+        self.clear_unmerge_cache_button.setEnabled(True)
+        self.clear_unmerge_cache_button.setText(" Clear Unmerge Cache")
 
     def on_unmerge_files(self):
         self.log_display.clear()
@@ -150,14 +181,18 @@ class BillsProcess(QWidget):
         date = self.date_select.date()
         year, month, day = date.year(), date.month(), date.day()
         
-        def task():
+        def task(**kwargs):
             file_unmerger = FileUnmerger()
-            return file_unmerger.unmerge_daily_bills_files(year, month, day)
+            return file_unmerger.unmerge_daily_bills_files(year, month, day, **kwargs)
 
         worker = Worker(task)
         worker.signals.result.connect(self._on_unmerge_files_complete)
         worker.signals.error.connect(self._on_processing_error)
+        worker.signals.progress.connect(self._on_unmerge_progress)
         self.threadpool.start(worker)
+
+    def _on_unmerge_progress(self, message):
+        self.log_display.append(message)
 
     def _on_unmerge_files_complete(self, result):
         self.log_display.append(f"\n--- Unmerge Result ---\n{result.message}")
@@ -173,7 +208,7 @@ class BillsProcess(QWidget):
         date = self.date_select.date()
         year, month, day = date.year(), date.month(), date.day()
         
-        def task():
+        def task(**kwargs):
             row_rearranger = RowRearranger()
             return row_rearranger.rearrange_template_rows(year, month, day)
 
@@ -196,7 +231,7 @@ class BillsProcess(QWidget):
         date = self.date_select.date()
         year, month, day = date.year(), date.month(), date.day()
         
-        def task():
+        def task(**kwargs):
             formula_updater = FormulaUpdater()
             return formula_updater.update_formulas(year, month, day)
 
@@ -211,30 +246,63 @@ class BillsProcess(QWidget):
         self.update_formulas_button.setText(" Update Formulas")
 
     def on_open_report(self):
-        self.log_display.setPlainText("Opening monthly report...")
-
-    def on_clear_cache(self):
         self.log_display.clear()
-        self.log_display.setPlainText("⏳ Clearing cache...")
-        self.clear_cache_button.setEnabled(False)
-        self.clear_cache_button.setText("Clearing...")
+        self.log_display.setPlainText("⏳ Opening monthly report...")
+        self.open_report_button.setEnabled(False)
+        self.open_report_button.setText("Opening...")
+
+        date = self.date_select.date()
+        year, month = date.year(), date.month()
+
+        def task(**kwargs):
+            file_opener = FileOpener()
+            return file_opener.open_monthly_report_file(year, month)
+
+        worker = Worker(task)
+        worker.signals.result.connect(self._on_open_report_complete)
+        worker.signals.error.connect(self._on_processing_error)
+        self.threadpool.start(worker)
+
+    def _on_open_report_complete(self, result):
+        self.log_display.append(f"\n--- Open Report Result ---\n{result.message}")
+        self.open_report_button.setEnabled(True)
+        self.open_report_button.setText(" Open Monthly Report")
+
+    def on_clear_unmerge_cache(self):
+        from PySide6.QtWidgets import QMessageBox
+
+        reply = QMessageBox.question(
+            self,
+            "Confirm Clear Unmerge Cache",
+            "Are you sure you want to clear the unmerge history for this date?\nThis will allow all files for the day to be unmerged again.",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        if reply == QMessageBox.No:
+            self.log_display.append("\nCache clearing cancelled.")
+            return
+
+        self.log_display.clear()
+        self.log_display.setPlainText("⏳ Clearing unmerge cache...")
+        self.clear_unmerge_cache_button.setEnabled(False)
+        self.clear_unmerge_cache_button.setText("Clearing...")
 
         date = self.date_select.date()
         year, month, day = date.year(), date.month(), date.day()
         
-        def task():
-            cache_manager = CacheManager()
-            return cache_manager.clear_process_cache(year, month, day, parent_widget=self)
+        def task(**kwargs):
+            file_unmerger = FileUnmerger()
+            return file_unmerger.clear_unmerged_cache(year, month, day)
 
         worker = Worker(task)
-        worker.signals.result.connect(self._on_clear_cache_complete)
+        worker.signals.result.connect(self._on_clear_unmerge_cache_complete)
         worker.signals.error.connect(self._on_processing_error)
         self.threadpool.start(worker)
 
-    def _on_clear_cache_complete(self, result):
-        self.log_display.append(f"\n--- Cache Clear Result ---\n{result.message}")
-        self.clear_cache_button.setEnabled(True)
-        self.clear_cache_button.setText(" Clear Cache")
+    def _on_clear_unmerge_cache_complete(self, result):
+        self.log_display.append(f"\n--- Unmerge Cache Clear Result ---\n{result.message}")
+        self.clear_unmerge_cache_button.setEnabled(True)
+        self.clear_unmerge_cache_button.setText(" Clear Unmerge Cache")
 
     def on_date_changed(self):
         self.log_display.clear()

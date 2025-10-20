@@ -6,8 +6,10 @@ from PySide6.QtGui import QFontDatabase, QFont
 from src.app.layout import MainLayout
 from src.styles.theme_manager import ThemeManager
 from src.db.user_queries import initialize_db, add_user
+from src.db.unmerged_files_queries import initialize_db as initialize_unmerged_db
 from src.auth_dialog import LoginDialog
 from src.user_manager import UserManager
+from src.styles.custom_style import NoFocusProxyStyle
 
 
 class MainWindow(QMainWindow):
@@ -34,11 +36,13 @@ class MainWindow(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
+    app.setStyle(NoFocusProxyStyle())
 
     app.setFont(QFont("Tahoma", 10))
 
     load_dotenv()
     initialize_db()
+    initialize_unmerged_db()
 
     # Create managers
     user_manager = UserManager()

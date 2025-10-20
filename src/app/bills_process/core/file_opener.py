@@ -24,7 +24,7 @@ class FileOpener:
         base_path = config['base_path']
 
         # 2. Build the file path
-        folder = os.path.join(base_path, f"Year_{year:04d}")
+        folder = os.path.join(base_path, f"Year_{year:04d}", f"Month_{month:02d}")
         filename = f"Monthly_Report_{month}_{year}.xlsx"
         file_path = os.path.join(folder, filename)
         

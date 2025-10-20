@@ -5,7 +5,7 @@ class WorkerSignals(QObject):
     finished = Signal()
     error = Signal(tuple)
     result = Signal(object)
-    progress = Signal(int)
+    progress = Signal(str)
 
 class Worker(QRunnable):
     """

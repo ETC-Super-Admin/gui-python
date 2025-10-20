@@ -1,3 +1,4 @@
+import os
 from .result import Result
 from src.db.config_queries import get_config
 from src.db.path_config_queries import get_all_path_configs
@@ -34,8 +35,11 @@ class ConfigManager:
             if not template_dir:
                 return Result.error(f"❌ Path for the default inventory code '{default_inventory_code}' not found. Please check your 'Path Configuration' settings.")
 
+            # Normalize the path to ensure consistent separators
+            normalized_path = os.path.normpath(template_dir)
+
             return Result.success({
-                "base_path": template_dir,
+                "base_path": normalized_path,
                 "inventory_code": default_inventory_code
             })
 

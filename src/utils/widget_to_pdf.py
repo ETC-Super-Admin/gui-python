@@ -11,20 +11,31 @@ from reportlab.platypus import Paragraph, Image, Spacer, Frame, Flowable
 from reportlab.lib.colors import HexColor, black
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfbase.pdfmetrics import registerFontFamily
 
 # Database and config imports
 from src.db.config_queries import get_config
 
 # --- Font Setup ---
 FONT_FAMILY = "Tahoma"
-FONT_FAMILY_BOLD = "Tahoma-Bold"
+FONT_FAMILY_BOLD = "Tahoma-Bold" # This can be kept for clarity if used elsewhere, but the family is key
 
-# Register bold font for reportlab if available
+# Register Tahoma fonts and create a family to handle bolding
 try:
+    # You need both the regular and bold font files for this to work.
+    # ReportLab will search in default locations, or you can provide full paths.
+    pdfmetrics.registerFont(TTFont('Tahoma', 'tahoma.ttf'))
     pdfmetrics.registerFont(TTFont('Tahoma-Bold', 'tahomabd.ttf'))
-except:
-    # Fallback if bold font file is not found
-    pass
+    # This tells reportlab that when it sees a <b> tag in a paragraph
+    # with the 'Tahoma' font, it should use the 'Tahoma-Bold' font.
+    registerFontFamily('Tahoma', normal='Tahoma', bold='Tahoma-Bold', italic='Tahoma', boldItalic='Tahoma-Bold')
+except Exception as e:
+    print(f"WARNING: Could not register Tahoma fonts for PDF generation: {e}")
+    print("Falling back to default Helvetica font. Bold Thai text may not render correctly.")
+    # If Tahoma fails, fall back to a built-in font.
+    # Note: Helvetica does not support Thai characters. This is a graceful failure.
+    FONT_FAMILY = "Helvetica"
+    FONT_FAMILY_BOLD = "Helvetica-Bold"
 
 class Line(Flowable):
     """A simple horizontal line flowable."""
