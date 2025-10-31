@@ -54,21 +54,6 @@ class BillsProcess(QWidget):
         self.date_select.setCalendarPopup(True)
         self.date_select.setFixedHeight(35)
 
-        # Programmatically set the icon for the calendar popup button
-        try:
-            down_arrow_button = self.date_select.findChild(QToolButton)
-            if down_arrow_button:
-                # Construct absolute path to the icon for robustness
-                script_dir = os.path.dirname(os.path.abspath(__file__))
-                icon_path = os.path.join(script_dir, '..', '..', '..', 'public', 'calendar.svg')
-                if os.path.exists(icon_path):
-                    down_arrow_button.setIcon(QIcon(icon_path))
-                    down_arrow_button.setStyleSheet("border: none; padding: 0px;")
-                else:
-                    print(f"Calendar icon not found at: {icon_path}")
-        except Exception as e:
-            print(f"Could not set calendar icon: {e}")
-
         actions_layout.addWidget(self.date_select)
         actions_layout.addSpacing(15)
 
