@@ -76,11 +76,11 @@ class WorksheetManager:
         """Fills columns D, E, G, H, K, L, M from the data dictionary."""
         # This mapping assumes specific 'field_name' values were used in the Cell Configuration.
         column_map = {
-            "D": data_dict.get("invoice_no", ""),
-            "E": data_dict.get("address", ""),
-            "G": data_dict.get("price", ""),
-            "H": data_dict.get("cost", ""),
-            "K": data_dict.get("platform_check", ""),
+            "D": data_dict.get("receiver_name", ""),
+            "E": data_dict.get("receiver_address", ""),
+            "G": data_dict.get("sum_qty", ""),
+            "H": data_dict.get("grand_total", ""),
+            "K": data_dict.get("delivery_by", ""),
             "L": data_dict.get("platform", ""),
             "M": data_dict.get("phone", "")
         }
@@ -92,6 +92,25 @@ class WorksheetManager:
             if col_letter in ("G", "H") and isinstance(value, (int, float)):
                 cell.number_format = '#,##0'
 
+        def _fill_collected_data(self, worksheet, row: int, data_dict: Dict[str, Any]):
+            """Fills columns D, E, G, H, K, L, M from the data dictionary."""
+            # This mapping assumes specific 'field_name' values were used in the Cell Configuration.
+            column_map = {
+                "D": data_dict.get("receiver_name", ""),
+                "E": data_dict.get("receiver_address", ""),
+                "G": data_dict.get("sum_qty", ""),
+                "H": data_dict.get("grand_total", ""),
+                "K": data_dict.get("delivery_by", ""),
+                "L": data_dict.get("platform", ""),
+                "M": data_dict.get("phone", "")
+            }
+            
+            for col_letter, value in column_map.items():
+                cell = worksheet[f"{col_letter}{row}"]
+                cell.value = value
+                cell.font = self.font
+                if col_letter in ("G", "H") and isinstance(value, (int, float)):
+                    cell.number_format = '#,##0' 
     def _apply_borders(self, worksheet, row: int):
         """Applies thin borders to all cells in the data row."""
         for col in range(1, 15):  # Columns A to N

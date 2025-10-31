@@ -44,17 +44,18 @@ class FileScanner:
     
     def _scan_template_file(self, year: int, month: int) -> Result:
         """Scan for the monthly template file."""
-        year_dir = os.path.join(
+        month_dir = os.path.join(
             self.base_path,
-            f"Year_{year:04d}"
+            f"Year_{year:04d}",
+            f"Month_{month:02d}"
         )
         
-        if not os.path.exists(year_dir):
-            return Result.error(f"❌ Year directory not found for template:\n{year_dir}")
+        if not os.path.exists(month_dir):
+            return Result.error(f"❌ Month directory not found for template:\n{month_dir}")
 
         # Construct the expected template filename
         expected_template_filename = f"Monthly_Report_{month}_{year}.xlsx"
-        template_file_path = os.path.join(year_dir, expected_template_filename)
+        template_file_path = os.path.join(month_dir, expected_template_filename)
         
         if not os.path.exists(template_file_path):
             return Result.error(f"❌ Expected template file not found:\n{template_file_path}")

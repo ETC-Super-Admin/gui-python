@@ -60,9 +60,6 @@ class BillsProcess(QWidget):
         self.process_button = self.create_action_button(
             "Process Files", 'fa5s.cogs', "SuccessButton"
         )
-        self.unmerge_button = self.create_action_button(
-            "Unmerge Daily Files", 'fa5s.th-large', "SuccessOutlineButton", icon_color='#22c55e'
-        )
         self.rearrange_button = self.create_action_button(
             "Rearrange Rows", 'fa5s.sort-amount-down', "WarningButton"
         )
@@ -73,7 +70,6 @@ class BillsProcess(QWidget):
             "Open Monthly Report", 'fa5s.folder-open'
         )
 
-        actions_layout.addWidget(self.unmerge_button)
         actions_layout.addWidget(self.process_button)
         actions_layout.addWidget(self.update_formulas_button)
         actions_layout.addSpacing(20)
@@ -89,10 +85,10 @@ class BillsProcess(QWidget):
         danger_group.setObjectName("Card")
         danger_layout = QVBoxLayout(danger_group)
         
-        self.clear_unmerge_cache_button = self.create_action_button(
-            "Clear Unmerge Cache", 'fa5s.trash-alt', "DeleteUserButton"
+        self.clear_process_state_button = self.create_action_button(
+            "Clear Process State", 'fa5s.trash-alt', "DangerOutlineButton", icon_color='#ef4444'
         )
-        danger_layout.addWidget(self.clear_unmerge_cache_button)
+        danger_layout.addWidget(self.clear_process_state_button)
         
         right_layout.addWidget(danger_group)
 
@@ -111,11 +107,10 @@ class BillsProcess(QWidget):
 
     def connect_signals(self):
         self.process_button.clicked.connect(self.on_process_files)
-        self.unmerge_button.clicked.connect(self.on_unmerge_files)
         self.rearrange_button.clicked.connect(self.on_rearrange_rows)
         self.update_formulas_button.clicked.connect(self.on_update_formulas)
         self.open_report_button.clicked.connect(self.on_open_report)
-        self.clear_unmerge_cache_button.clicked.connect(self.on_clear_unmerge_cache)
+        self.clear_process_state_button.clicked.connect(self.on_clear_process_state)
         self.date_select.dateChanged.connect(self.on_date_changed)
 
     def on_process_files(self):
@@ -128,12 +123,16 @@ class BillsProcess(QWidget):
         
         def task(**kwargs):
             orchestrator = Orchestrator(date)
-            return orchestrator.run_process_files()
+            return orchestrator.run_process_files(**kwargs)
 
         worker = Worker(task)
         worker.signals.result.connect(self._on_processing_complete)
         worker.signals.error.connect(self._on_processing_error)
+        worker.signals.progress.connect(self._on_process_progress)
         self.threadpool.start(worker)
+
+    def _on_process_progress(self, message):
+        self.log_display.append(message)
 
     def _on_processing_complete(self, result):
         self.log_display.append(f"\n--- Result ---\n{result.message}")
@@ -146,43 +145,14 @@ class BillsProcess(QWidget):
         # Reset all buttons that could have been disabled
         self.process_button.setEnabled(True)
         self.process_button.setText(" Process Files")
-        self.unmerge_button.setEnabled(True)
-        self.unmerge_button.setText(" Unmerge Daily Files")
         self.rearrange_button.setEnabled(True)
         self.rearrange_button.setText(" Rearrange Rows")
         self.update_formulas_button.setEnabled(True)
         self.update_formulas_button.setText(" Update Formulas")
         self.open_report_button.setEnabled(True)
         self.open_report_button.setText(" Open Monthly Report")
-        self.clear_unmerge_cache_button.setEnabled(True)
-        self.clear_unmerge_cache_button.setText(" Clear Unmerge Cache")
-
-    def on_unmerge_files(self):
-        self.log_display.clear()
-        self.log_display.setPlainText("⏳ Starting file unmerge...")
-        self.unmerge_button.setEnabled(False)
-        self.unmerge_button.setText("Unmerging...")
-
-        date = self.date_select.date()
-        year, month, day = date.year(), date.month(), date.day()
-        
-        def task(**kwargs):
-            file_unmerger = FileUnmerger()
-            return file_unmerger.unmerge_daily_bills_files(year, month, day, **kwargs)
-
-        worker = Worker(task)
-        worker.signals.result.connect(self._on_unmerge_files_complete)
-        worker.signals.error.connect(self._on_processing_error)
-        worker.signals.progress.connect(self._on_unmerge_progress)
-        self.threadpool.start(worker)
-
-    def _on_unmerge_progress(self, message):
-        self.log_display.append(message)
-
-    def _on_unmerge_files_complete(self, result):
-        self.log_display.append(f"\n--- Unmerge Result ---\n{result.message}")
-        self.unmerge_button.setEnabled(True)
-        self.unmerge_button.setText(" Unmerge Daily Files")
+        self.clear_process_state_button.setEnabled(True)
+        self.clear_process_state_button.setText(" Clear Process State")
 
     def on_rearrange_rows(self):
         self.log_display.clear()
@@ -253,41 +223,41 @@ class BillsProcess(QWidget):
         self.open_report_button.setEnabled(True)
         self.open_report_button.setText(" Open Monthly Report")
 
-    def on_clear_unmerge_cache(self):
+    def on_clear_process_state(self):
         from PySide6.QtWidgets import QMessageBox
 
         reply = QMessageBox.question(
             self,
-            "Confirm Clear Unmerge Cache",
-            "Are you sure you want to clear the unmerge history for this date?\nThis will allow all files for the day to be unmerged again.",
+            "Confirm Clear Process State",
+            "Are you sure you want to clear the processing state for this date?\nThis will allow all files for the day to be processed again from scratch.",
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No
         )
         if reply == QMessageBox.No:
-            self.log_display.append("\nCache clearing cancelled.")
+            self.log_display.append("\nProcess state clearing cancelled.")
             return
 
         self.log_display.clear()
-        self.log_display.setPlainText("⏳ Clearing unmerge cache...")
-        self.clear_unmerge_cache_button.setEnabled(False)
-        self.clear_unmerge_cache_button.setText("Clearing...")
+        self.log_display.setPlainText("⏳ Clearing process state...")
+        self.clear_process_state_button.setEnabled(False)
+        self.clear_process_state_button.setText("Clearing...")
 
         date = self.date_select.date()
         year, month, day = date.year(), date.month(), date.day()
         
         def task(**kwargs):
-            file_unmerger = FileUnmerger()
-            return file_unmerger.clear_unmerged_cache(year, month, day)
+            cache_manager = CacheManager()
+            return cache_manager.clear_process_cache(year, month, day)
 
         worker = Worker(task)
-        worker.signals.result.connect(self._on_clear_unmerge_cache_complete)
+        worker.signals.result.connect(self._on_clear_process_state_complete)
         worker.signals.error.connect(self._on_processing_error)
         self.threadpool.start(worker)
 
-    def _on_clear_unmerge_cache_complete(self, result):
-        self.log_display.append(f"\n--- Unmerge Cache Clear Result ---\n{result.message}")
-        self.clear_unmerge_cache_button.setEnabled(True)
-        self.clear_unmerge_cache_button.setText(" Clear Unmerge Cache")
+    def _on_clear_process_state_complete(self, result):
+        self.log_display.append(f"\n--- Process State Clear Result ---\n{result.message}")
+        self.clear_process_state_button.setEnabled(True)
+        self.clear_process_state_button.setText(" Clear Process State")
 
     def on_date_changed(self):
         self.log_display.clear()

@@ -167,3 +167,20 @@ QPushButton:disabled {{
 #WarningButton:hover {{
     background-color: #d97706; /* Darker amber */
 }}
+
+/* Danger Outline Button Style */
+#DangerOutlineButton {{
+    background-color: {DESTRUCTIVE_RGBA_15};
+    color: {DESTRUCTIVE};
+    border: 1px dashed {DESTRUCTIVE};
+}}
+
+#DangerOutlineButton:hover {{
+    background-color: {DESTRUCTIVE_RGBA_HOVER};
+    border-color: {DESTRUCTIVE};
+}}
+
+#DangerOutlineButton:pressed {{
+    background-color: {DESTRUCTIVE_RGBA_PRESSED};
+    border-color: {DESTRUCTIVE};
+}}

@@ -21,21 +21,30 @@ class ExcelProcessor:
         self.formula_manager = FormulaManager()
         self.holiday_validator = HolidayValidator()
 
-    def process(self) -> Result:
+    def process(self, **kwargs) -> Result:
         """
         Main method to process the Excel template.
         """
+        progress_callback = kwargs.get('progress_callback')
+        def report_progress(msg):
+            if progress_callback:
+                progress_callback.emit(msg)
+
         state_file_path = os.path.join(self.target_dir, ".processing_state.json")
         
         try:
             # 1. Load processing state
+            report_progress("  > Loading processing state...")
             processed_files_set = self.state_manager.load_processed_files(state_file_path)
+            report_progress(f"  > Found {len(processed_files_set)} already processed file(s).")
 
             # 2. Filter for new files
             new_daily_files = [f for f in self.daily_files if f not in processed_files_set]
 
             if not new_daily_files:
                 return Result.info("✅ All daily bills for this date have already been processed.")
+            
+            report_progress(f"  > Found {len(new_daily_files)} new file(s) to process.")
 
             new_data = []
             for i, f in enumerate(self.daily_files):
@@ -43,6 +52,7 @@ class ExcelProcessor:
                     new_data.append(self.data[i])
 
             # 3. Load workbook
+            report_progress("  > Loading workbook...")
             wb = load_workbook(self.template_path)
             sheet_name = str(self.date.day())
             
@@ -51,12 +61,13 @@ class ExcelProcessor:
             
             ws = wb[sheet_name]
 
-            # Fill processing date
+            report_progress("  > Filling processing date...")
             thai_date = self.date_formatter.format_thai_date(self.date.day(), self.date.month(), self.date.year())
             ws['D2'] = thai_date
             ws['D2'].font = self.date_formatter.date_font
 
             # 4. Prepare worksheet and fill data
+            report_progress("  > Preparing worksheet and filling data...")
             num_existing_files = len(processed_files_set)
             num_new_files = len(new_daily_files)
             
@@ -64,17 +75,21 @@ class ExcelProcessor:
             self.worksheet_manager.fill_data(ws, new_daily_files, new_data, self.inventory_code, num_existing_files)
 
             # 5. Add summary formulas
+            report_progress("  > Adding summary formulas...")
             first_data_row = 5
             total_files = num_existing_files + num_new_files
             last_data_row = first_data_row + total_files - 1
             self.formula_manager.add_summary_formulas(ws, first_data_row, last_data_row)
 
             # 6. Handle cumulative sales
+            report_progress("  > Handling cumulative sales...")
             self._handle_cumulative_sales(wb, ws, self.date.day(), last_data_row)
             
+            report_progress("  > Saving workbook...")
             wb.save(self.template_path)
 
             # 7. Update state
+            report_progress("  > Updating processing state...")
             updated_processed_files = processed_files_set.union(set(new_daily_files))
             self.state_manager.save_processed_files(state_file_path, updated_processed_files)
 
