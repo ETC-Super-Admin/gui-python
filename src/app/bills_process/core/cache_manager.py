@@ -35,24 +35,12 @@ class CacheManager:
         
         cache_file = os.path.join(day_path, ".processing_state.json")
 
-        # 3. Ask for confirmation
-        if parent_widget:
-            reply = QMessageBox.question(
-                parent_widget,
-                "Confirm Clear Cache",
-                "Are you sure you want to clear the cache for this date?\nThis action cannot be undone.",
-                QMessageBox.Yes | QMessageBox.No,
-                QMessageBox.No
-            )
-            if reply == QMessageBox.No:
-                return Result.info("Cache clearing cancelled.")
-
         # 4. Check if cache file exists and delete it
         if not os.path.exists(cache_file):
-            return Result.info("No cache file found for this date.")
+            return Result.info("ไม่พบไฟล์แคชสำหรับวันนี้")
         
         try:
             os.remove(cache_file)
-            return Result.success("✅ Processing cache cleared successfully.")
+            return Result.success("✅ ล้างแคชการประมวลผลสำเร็จ")
         except Exception as e:
-            return Result.error(f"❌ An error occurred while clearing cache: {e}")
+            return Result.error(f"❌ เกิดข้อผิดพลาดขณะล้างแคช: {e}")

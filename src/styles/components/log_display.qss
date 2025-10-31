@@ -1,0 +1,10 @@
+/* Log Display */
+QTextEdit#LogDisplay {{
+    background-color: {LOG_BACKGROUND};
+    color: {LOG_FOREGROUND};
+    font-family: "Consolas", "Courier New", "monospace";
+    font-size: 13px;
+    border: 1px solid {BORDER};
+    border-radius: 8px;
+    padding: 10px;
+}}

@@ -24,18 +24,18 @@ class RowRearranger:
         base_path = config['base_path']
 
         # 2. Locate template file
-        year_dir = os.path.join(base_path, f"Year_{year:04d}")
-        template_file = os.path.join(year_dir, f"Monthly_Report_{month}_{year}.xlsx")
+        month_dir = os.path.join(base_path, f"Year_{year:04d}", f"Month_{month:02d}")
+        template_file = os.path.join(month_dir, f"Monthly_Report_{month}_{year}.xlsx")
         
         if not os.path.exists(template_file):
-            return Result.error(f"❌ Template file not found:\n{template_file}")
+            return Result.error(f"❌ ไม่พบไฟล์แม่แบบ:\n{template_file}")
 
         try:
             # 3. Open workbook and sheet
             wb = load_workbook(template_file)
             sheet_name = str(day)
             if sheet_name not in wb.sheetnames:
-                return Result.error(f"❌ Sheet '{sheet_name}' not found in the template file.")
+                return Result.error(f"❌ ไม่พบชีทชื่อ '{sheet_name}' ในไฟล์แม่แบบ")
             ws = wb[sheet_name]
 
             # 4. Read all data rows (starting from row 5, until first empty A cell or until formulas row)
@@ -53,15 +53,15 @@ class RowRearranger:
                 row_idx += 1
             
             if not data_rows:
-                return Result.info("No data rows to rearrange.")
+                return Result.info("ไม่มีแถวข้อมูลให้จัดเรียงใหม่")
 
             # 5. Sort by column L (index 11), then by column E (index 4)
             def sort_key(row_data_list):
                 # Column L (index 11) for platform (Lazada/Shopee)
                 l_val = (row_data_list[11] or '').strip().lower()
-                if 'lazada' in l_val:
+                if l_val == 'lazada':
                     l_order = 0
-                elif 'shopee' in l_val:
+                elif l_val == 'shopee':
                     l_order = 1
                 else:
                     l_order = 2
@@ -80,9 +80,9 @@ class RowRearranger:
                     ws.cell(row=target_row_num, column=col_num).value = row_data[col_num-1]
             
             wb.save(template_file)
-            return Result.success("✅ Rows rearranged successfully by platform and province/zone.")
+            return Result.success("✅ จัดเรียงแถวใหม่ตามแพลตฟอร์มและจังหวัด/โซนสำเร็จ")
 
         except PermissionError:
-            return Result.error(f"❌ Permission denied. The template file might be open:\n{template_file}\nPlease close it and try again.")
+            return Result.error(f"❌ การเข้าถึงถูกปฏิเสธ ไฟล์แม่แบบอาจถูกเปิดอยู่:\n{template_file}\nกรุณาปิดไฟล์แล้วลองอีกครั้ง")
         except Exception as e:
-            return Result.error(f"❌ An unexpected error occurred during row rearrangement: {e}")
+            return Result.error(f"❌ เกิดข้อผิดพลาดที่ไม่คาดคิดระหว่างการจัดเรียงแถวใหม่: {e}")

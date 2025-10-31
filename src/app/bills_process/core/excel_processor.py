@@ -34,17 +34,17 @@ class ExcelProcessor:
         
         try:
             # 1. Load processing state
-            report_progress("  > Loading processing state...")
+            report_progress("  > กำลังโหลดสถานะการประมวลผล...")
             processed_files_set = self.state_manager.load_processed_files(state_file_path)
-            report_progress(f"  > Found {len(processed_files_set)} already processed file(s).")
+            report_progress(f"  > พบไฟล์ที่ประมวลผลแล้ว {len(processed_files_set)} ไฟล์")
 
             # 2. Filter for new files
             new_daily_files = [f for f in self.daily_files if f not in processed_files_set]
 
             if not new_daily_files:
-                return Result.info("✅ All daily bills for this date have already been processed.")
+                return Result.info("✅ ไฟล์บิลรายวันทั้งหมดสำหรับวันนี้ได้รับการประมวลผลแล้ว")
             
-            report_progress(f"  > Found {len(new_daily_files)} new file(s) to process.")
+            report_progress(f"  > พบไฟล์ใหม่ {len(new_daily_files)} ไฟล์ที่ต้องประมวลผล")
 
             new_data = []
             for i, f in enumerate(self.daily_files):
@@ -52,22 +52,22 @@ class ExcelProcessor:
                     new_data.append(self.data[i])
 
             # 3. Load workbook
-            report_progress("  > Loading workbook...")
+            report_progress("  > กำลังโหลดสมุดงาน...")
             wb = load_workbook(self.template_path)
             sheet_name = str(self.date.day())
             
             if sheet_name not in wb.sheetnames:
-                return Result.error(f"❌ Sheet '{sheet_name}' not found in the template file.")
+                return Result.error(f"❌ ไม่พบชีทชื่อ '{sheet_name}' ในไฟล์แม่แบบ")
             
             ws = wb[sheet_name]
 
-            report_progress("  > Filling processing date...")
+            report_progress("  > กำลังกรอกวันที่ประมวลผล...")
             thai_date = self.date_formatter.format_thai_date(self.date.day(), self.date.month(), self.date.year())
             ws['D2'] = thai_date
             ws['D2'].font = self.date_formatter.date_font
 
             # 4. Prepare worksheet and fill data
-            report_progress("  > Preparing worksheet and filling data...")
+            report_progress("  > กำลังเตรียมชีทงานและกรอกข้อมูล...")
             num_existing_files = len(processed_files_set)
             num_new_files = len(new_daily_files)
             
@@ -75,30 +75,30 @@ class ExcelProcessor:
             self.worksheet_manager.fill_data(ws, new_daily_files, new_data, self.inventory_code, num_existing_files)
 
             # 5. Add summary formulas
-            report_progress("  > Adding summary formulas...")
+            report_progress("  > กำลังเพิ่มสูตรสรุป...")
             first_data_row = 5
             total_files = num_existing_files + num_new_files
             last_data_row = first_data_row + total_files - 1
             self.formula_manager.add_summary_formulas(ws, first_data_row, last_data_row)
 
             # 6. Handle cumulative sales
-            report_progress("  > Handling cumulative sales...")
+            report_progress("  > กำลังจัดการยอดขายสะสม...")
             self._handle_cumulative_sales(wb, ws, self.date.day(), last_data_row)
             
-            report_progress("  > Saving workbook...")
+            report_progress("  > กำลังบันทึกสมุดงาน...")
             wb.save(self.template_path)
 
             # 7. Update state
-            report_progress("  > Updating processing state...")
+            report_progress("  > กำลังอัปเดตสถานะการประมวลผล...")
             updated_processed_files = processed_files_set.union(set(new_daily_files))
             self.state_manager.save_processed_files(state_file_path, updated_processed_files)
 
-            return Result.success(f"✅ Successfully processed {len(new_daily_files)} new file(s).")
+            return Result.success(f"✅ ประมวลผลไฟล์ใหม่ {len(new_daily_files)} ไฟล์สำเร็จ")
 
         except PermissionError:
-            return Result.error(f"❌ Permission denied. The template file might be open:\n{self.template_path}\nPlease close it and try again.")
+            return Result.error(f"❌ การเข้าถึงถูกปฏิเสธ ไฟล์แม่แบบอาจถูกเปิดอยู่:\n{self.template_path}\nกรุณาปิดไฟล์แล้วลองอีกครั้ง")
         except Exception as e:
-            return Result.error(f"❌ An unexpected error occurred during Excel processing: {e}")
+            return Result.error(f"❌ เกิดข้อผิดพลาดที่ไม่คาดคิดระหว่างการประมวลผล Excel: {e}")
 
     def _handle_cumulative_sales(self, workbook, worksheet, day: int, last_data_row: int):
         """

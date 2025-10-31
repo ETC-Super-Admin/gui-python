@@ -10,7 +10,8 @@ COMPONENT_STYLES = [
     "table",
     "dialog",
     "card",
-    "receiver_table_view"
+    "receiver_table_view",
+    "log_display"
 ]
 
 def load_and_format_stylesheet(theme):

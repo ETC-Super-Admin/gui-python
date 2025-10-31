@@ -31,13 +31,13 @@ class DataCollector:
                 progress_callback.emit(msg)
 
         if not self.bill_configs:
-            return Result.error("❌ No bill processing configurations found. Please set them up in the 'Bill Processing Configuration' page.")
+            return Result.error("❌ ไม่พบการตั้งค่าการประมวลผลบิล กรุณาตั้งค่าในหน้า 'การตั้งค่าการประมวลผลบิล'")
 
         try:
             collected_data = []
             total_files = len(daily_files)
             for i, fname in enumerate(daily_files):
-                report_progress(f"  > Collecting from {fname} ({i+1}/{total_files})")
+                report_progress(f"  > กำลังรวบรวมข้อมูลจาก {fname} ({i+1}/{total_files})")
                 file_path = os.path.join(target_dir, fname)
                 file_result_dict = self._collect_from_single_file(file_path)
                 collected_data.append(file_result_dict)
@@ -45,7 +45,7 @@ class DataCollector:
             return Result.success(collected_data)
             
         except Exception as e:
-            return Result.error(f"❌ An error occurred while collecting data from files: {e}")
+            return Result.error(f"❌ เกิดข้อผิดพลาดขณะรวบรวมข้อมูลจากไฟล์: {e}")
     
     def _collect_from_single_file(self, file_path: str) -> Dict[str, Any]:
         """

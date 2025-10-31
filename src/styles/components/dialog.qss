@@ -98,6 +98,58 @@ QMessageBox QPushButton {{
     font-weight: 500;
 }}
 
+/* --- Custom Dialog Button Variants by objectName --- */
+
+/* Default / Primary Action */
+QDialog QPushButton[objectName="DefaultDialogButton"] {{
+    background-color: {PRIMARY};
+    color: {PRIMARY_FOREGROUND};
+    border: none;
+}}
+QDialog QPushButton[objectName="DefaultDialogButton"]:hover {{
+    background-color: {RING};
+}}
+
+/* Success Action */
+QDialog QPushButton[objectName="SuccessDialogButton"] {{
+    background-color: {SUCCESS};
+    color: {SUCCESS_FOREGROUND};
+    border: none;
+}}
+QDialog QPushButton[objectName="SuccessDialogButton"]:hover {{
+    background-color: #16a34a; /* Darker green */
+}}
+
+/* Danger / Destructive Action */
+QDialog QPushButton[objectName="DangerDialogButton"] {{
+    background-color: {DESTRUCTIVE};
+    color: {DESTRUCTIVE_FOREGROUND};
+    border: none;
+}}
+QDialog QPushButton[objectName="DangerDialogButton"]:hover {{
+    background-color: #b91c1c; /* Darker red */
+}}
+
+/* Warning Action */
+QDialog QPushButton[objectName="WarningDialogButton"] {{
+    background-color: {WARNING};
+    color: {WARNING_FOREGROUND};
+    border: none;
+}}
+QDialog QPushButton[objectName="WarningDialogButton"]:hover {{
+    background-color: #d97706; /* Darker amber */
+}}
+
+/* Secondary / Cancel Action */
+QDialog QPushButton[objectName="SecondaryDialogButton"] {{
+    background-color: {SECONDARY};
+    color: {SECONDARY_FOREGROUND};
+    border: 1px solid {BORDER};
+}}
+QDialog QPushButton[objectName="SecondaryDialogButton"]:hover {{
+    background-color: {HOVER};
+}}
+
 /* Message Box - Enhanced */
 QMessageBox {{
     background-color: {BACKGROUND};

@@ -29,15 +29,15 @@ class FileOpener:
         file_path = os.path.join(folder, filename)
         
         if not os.path.exists(file_path):
-            return Result.warning(f"❌ Monthly report file not found:\n{file_path}")
+            return Result.warning(f"❌ ไม่พบไฟล์รายงานประจำเดือน:\n{file_path}")
         
         # 3. Open the file with the default application
         try:
             self._open_file_with_system(file_path)
-            return Result.success(f"✅ Successfully opened file:\n{file_path}")
+            return Result.success(f"✅ เปิดไฟล์สำเร็จ:\n{file_path}")
             
         except Exception as e:
-            return Result.error(f"❌ Could not open file: {e}")
+            return Result.error(f"❌ ไม่สามารถเปิดไฟล์ได้: {e}")
     
     def _open_file_with_system(self, file_path):
         """Opens a file with the system's default application."""
@@ -48,4 +48,4 @@ class FileOpener:
         elif os.name == 'posix': # Linux, Unix
             subprocess.call(('xdg-open', file_path))
         else:
-            raise OSError("Unsupported operating system for opening files.")
+            raise OSError("ระบบปฏิบัติการไม่รองรับการเปิดไฟล์")

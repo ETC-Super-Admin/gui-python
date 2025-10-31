@@ -18,12 +18,12 @@ class ConfigManager:
             # Get the default inventory code from the general app config
             default_inventory_code = get_config("bills_process_inventory_code")
             if not default_inventory_code:
-                return Result.error("❌ Default inventory code is not set. Please set it in the 'Path Configuration' settings.")
+                return Result.error("❌ ไม่ได้ตั้งค่ารหัสสินค้าคงคลังเริ่มต้น กรุณาตั้งค่าในหน้า 'การตั้งค่าเส้นทาง'")
 
             # Get all available path configurations
             all_paths = get_all_path_configs()
             if not all_paths:
-                return Result.error("❌ No path configurations found. Please add one in the 'Path Configuration' settings.")
+                return Result.error("❌ ไม่พบการตั้งค่าเส้นทาง กรุณาเพิ่มการตั้งค่าในหน้า 'การตั้งค่าเส้นทาง'")
 
             # Find the template directory for the default inventory code
             template_dir = None
@@ -33,7 +33,7 @@ class ConfigManager:
                     break
             
             if not template_dir:
-                return Result.error(f"❌ Path for the default inventory code '{default_inventory_code}' not found. Please check your 'Path Configuration' settings.")
+                return Result.error(f"❌ ไม่พบเส้นทางสำหรับรหัสสินค้าคงคลังเริ่มต้น '{default_inventory_code}' กรุณาตรวจสอบ 'การตั้งค่าเส้นทาง'")
 
             # Normalize the path to ensure consistent separators
             normalized_path = os.path.normpath(template_dir)
@@ -44,4 +44,4 @@ class ConfigManager:
             })
 
         except Exception as e:
-            return Result.error(f"❌ An unexpected error occurred while loading configuration: {e}")
+            return Result.error(f"❌ เกิดข้อผิดพลาดที่ไม่คาดคิดขณะโหลดการตั้งค่า: {e}")

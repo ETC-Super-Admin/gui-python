@@ -26,6 +26,8 @@ LIGHT_THEME = {
     "SUCCESS_FOREGROUND": "#f8fafc",
     "WARNING": "#f59e0b",
     "WARNING_FOREGROUND": "#020817",
+    "LOG_BACKGROUND": "#f1f5f9",
+    "LOG_FOREGROUND": "#334155",
 }
 
 DARK_THEME = {
@@ -55,4 +57,6 @@ DARK_THEME = {
     "SUCCESS_FOREGROUND": "#f8fafc",
     "WARNING": "#d97706",
     "WARNING_FOREGROUND": "#f8fafc",
+    "LOG_BACKGROUND": "#0f172a",
+    "LOG_FOREGROUND": "#cbd5e1",
 }

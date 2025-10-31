@@ -27,11 +27,12 @@ class BillsProcess(QWidget):
         main_layout.setSpacing(20)
 
         # --- Left side (Log Display) ---
-        left_widget = QGroupBox("Processing Log")
+        left_widget = QGroupBox("บันทึกการประมวลผล")
         left_widget.setObjectName("Card")
         left_layout = QVBoxLayout(left_widget)
         
         self.log_display = QTextEdit()
+        self.log_display.setObjectName("LogDisplay")
         self.log_display.setReadOnly(True)
         self.log_display.setLineWrapMode(QTextEdit.NoWrap)
         self.log_display.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -44,12 +45,12 @@ class BillsProcess(QWidget):
         right_layout.setSpacing(15)
 
         # Actions Group
-        actions_group = QGroupBox("Actions")
+        actions_group = QGroupBox("การดำเนินการ")
         actions_group.setObjectName("Card")
         actions_layout = QVBoxLayout(actions_group)
         actions_layout.setSpacing(10)
 
-        actions_layout.addWidget(QLabel("Select Date:"))
+        actions_layout.addWidget(QLabel("เลือกวันที่:"))
         self.date_select = QDateEdit(QDate.currentDate())
         self.date_select.setCalendarPopup(True)
         self.date_select.setFixedHeight(35)
@@ -58,16 +59,16 @@ class BillsProcess(QWidget):
         actions_layout.addSpacing(15)
 
         self.process_button = self.create_action_button(
-            "Process Files", 'fa5s.cogs', "SuccessButton"
+            "ประมวลผลไฟล์", 'fa5s.cogs', "SuccessButton"
         )
         self.rearrange_button = self.create_action_button(
-            "Rearrange Rows", 'fa5s.sort-amount-down', "WarningButton"
+            "จัดเรียงแถวใหม่", 'fa5s.sort-amount-down', "WarningButton"
         )
         self.update_formulas_button = self.create_action_button(
-            "Update Formulas", 'fa5s.calculator', "SuccessOutlineButton", icon_color='#22c55e'
+            "อัปเดตสูตร", 'fa5s.calculator', "SuccessOutlineButton", icon_color='#22c55e'
         )
         self.open_report_button = self.create_action_button(
-            "Open Monthly Report", 'fa5s.folder-open'
+            "เปิดรายงานประจำเดือน", 'fa5s.folder-open'
         )
 
         actions_layout.addWidget(self.process_button)
@@ -81,12 +82,12 @@ class BillsProcess(QWidget):
         right_layout.addStretch(1)
 
         # Danger Zone Group
-        danger_group = QGroupBox("Danger Zone")
+        danger_group = QGroupBox("โซนอันตราย")
         danger_group.setObjectName("Card")
         danger_layout = QVBoxLayout(danger_group)
         
         self.clear_process_state_button = self.create_action_button(
-            "Clear Process State", 'fa5s.trash-alt', "DangerOutlineButton", icon_color='#ef4444'
+            "ล้างสถานะการประมวลผล", 'fa5s.trash-alt', "DangerOutlineButton", icon_color='#ef4444'
         )
         danger_layout.addWidget(self.clear_process_state_button)
         
@@ -115,9 +116,9 @@ class BillsProcess(QWidget):
 
     def on_process_files(self):
         self.log_display.clear()
-        self.log_display.setPlainText("⏳ Starting file processing...\nThis may take a moment.")
+        self.log_display.setPlainText("⏳ กำลังเริ่มต้นประมวลผลไฟล์...\nอาจใช้เวลาสักครู่")
         self.process_button.setEnabled(False)
-        self.process_button.setText("Processing...")
+        self.process_button.setText("กำลังประมวลผล...")
 
         date = self.date_select.date()
         
@@ -135,30 +136,30 @@ class BillsProcess(QWidget):
         self.log_display.append(message)
 
     def _on_processing_complete(self, result):
-        self.log_display.append(f"\n--- Result ---\n{result.message}")
+        self.log_display.append(f"\n--- ผลลัพธ์ ---\n{result.message}")
         self.process_button.setEnabled(True)
-        self.process_button.setText(" Process Files")
+        self.process_button.setText(" ประมวลผลไฟล์")
 
     def _on_processing_error(self, error_tuple):
         exctype, value, traceback_str = error_tuple
-        self.log_display.append(f"\n--- CRITICAL ERROR ---\n{value}\n\n{traceback_str}")
+        self.log_display.append(f"\n--- ข้อผิดพลาดร้ายแรง ---\n{value}\n\n{traceback_str}")
         # Reset all buttons that could have been disabled
         self.process_button.setEnabled(True)
-        self.process_button.setText(" Process Files")
+        self.process_button.setText(" ประมวลผลไฟล์")
         self.rearrange_button.setEnabled(True)
-        self.rearrange_button.setText(" Rearrange Rows")
+        self.rearrange_button.setText(" จัดเรียงแถวใหม่")
         self.update_formulas_button.setEnabled(True)
-        self.update_formulas_button.setText(" Update Formulas")
+        self.update_formulas_button.setText(" อัปเดตสูตร")
         self.open_report_button.setEnabled(True)
-        self.open_report_button.setText(" Open Monthly Report")
+        self.open_report_button.setText(" เปิดรายงานประจำเดือน")
         self.clear_process_state_button.setEnabled(True)
-        self.clear_process_state_button.setText(" Clear Process State")
+        self.clear_process_state_button.setText(" ล้างสถานะการประมวลผล")
 
     def on_rearrange_rows(self):
         self.log_display.clear()
-        self.log_display.setPlainText("⏳ Starting row rearrangement...")
+        self.log_display.setPlainText("⏳ กำลังจัดเรียงแถวใหม่...")
         self.rearrange_button.setEnabled(False)
-        self.rearrange_button.setText("Rearranging...")
+        self.rearrange_button.setText("กำลังจัดเรียง...")
 
         date = self.date_select.date()
         year, month, day = date.year(), date.month(), date.day()
@@ -173,15 +174,15 @@ class BillsProcess(QWidget):
         self.threadpool.start(worker)
 
     def _on_rearrange_rows_complete(self, result):
-        self.log_display.append(f"\n--- Rearrange Rows Result ---\n{result.message}")
+        self.log_display.append(f"\n--- ผลลัพธ์การจัดเรียงแถว ---\n{result.message}")
         self.rearrange_button.setEnabled(True)
-        self.rearrange_button.setText(" Rearrange Rows")
+        self.rearrange_button.setText(" จัดเรียงแถวใหม่")
 
     def on_update_formulas(self):
         self.log_display.clear()
-        self.log_display.setPlainText("⏳ Starting formula update...")
+        self.log_display.setPlainText("⏳ กำลังอัปเดตสูตร...")
         self.update_formulas_button.setEnabled(False)
-        self.update_formulas_button.setText("Updating...")
+        self.update_formulas_button.setText("กำลังอัปเดต...")
 
         date = self.date_select.date()
         year, month, day = date.year(), date.month(), date.day()
@@ -196,15 +197,15 @@ class BillsProcess(QWidget):
         self.threadpool.start(worker)
 
     def _on_update_formulas_complete(self, result):
-        self.log_display.append(f"\n--- Update Formulas Result ---\n{result.message}")
+        self.log_display.append(f"\n--- ผลลัพธ์การอัปเดตสูตร ---\n{result.message}")
         self.update_formulas_button.setEnabled(True)
-        self.update_formulas_button.setText(" Update Formulas")
+        self.update_formulas_button.setText(" อัปเดตสูตร")
 
     def on_open_report(self):
         self.log_display.clear()
-        self.log_display.setPlainText("⏳ Opening monthly report...")
+        self.log_display.setPlainText("⏳ กำลังเปิดรายงานประจำเดือน...")
         self.open_report_button.setEnabled(False)
-        self.open_report_button.setText("Opening...")
+        self.open_report_button.setText("กำลังเปิด...")
 
         date = self.date_select.date()
         year, month = date.year(), date.month()
@@ -219,28 +220,35 @@ class BillsProcess(QWidget):
         self.threadpool.start(worker)
 
     def _on_open_report_complete(self, result):
-        self.log_display.append(f"\n--- Open Report Result ---\n{result.message}")
+        self.log_display.append(f"\n--- ผลลัพธ์การเปิดรายงาน ---\n{result.message}")
         self.open_report_button.setEnabled(True)
-        self.open_report_button.setText(" Open Monthly Report")
+        self.open_report_button.setText(" เปิดรายงานประจำเดือน")
 
     def on_clear_process_state(self):
         from PySide6.QtWidgets import QMessageBox
 
-        reply = QMessageBox.question(
-            self,
-            "Confirm Clear Process State",
-            "Are you sure you want to clear the processing state for this date?\nThis will allow all files for the day to be processed again from scratch.",
+        msg_box = QMessageBox(QMessageBox.Warning,
+            "ยืนยันการล้างสถานะการประมวลผล",
+            "คุณแน่ใจหรือไม่ว่าต้องการล้างสถานะการประมวลผลสำหรับวันนี้?\nการดำเนินการนี้จะทำให้สามารถประมวลผลไฟล์ทั้งหมดสำหรับวันนี้ได้อีกครั้งตั้งแต่ต้น",
             QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No
+            self
         )
+        msg_box.setDefaultButton(QMessageBox.No)
+        
+        yes_button = msg_box.button(QMessageBox.Yes)
+        if yes_button:
+            yes_button.setObjectName("DangerDialogButton")
+
+        reply = msg_box.exec()
+
         if reply == QMessageBox.No:
-            self.log_display.append("\nProcess state clearing cancelled.")
+            self.log_display.append("\nยกเลิกการล้างสถานะการประมวลผลแล้ว.")
             return
 
         self.log_display.clear()
-        self.log_display.setPlainText("⏳ Clearing process state...")
+        self.log_display.setPlainText("⏳ กำลังล้างสถานะการประมวลผล...")
         self.clear_process_state_button.setEnabled(False)
-        self.clear_process_state_button.setText("Clearing...")
+        self.clear_process_state_button.setText("กำลังล้าง...")
 
         date = self.date_select.date()
         year, month, day = date.year(), date.month(), date.day()
@@ -255,10 +263,10 @@ class BillsProcess(QWidget):
         self.threadpool.start(worker)
 
     def _on_clear_process_state_complete(self, result):
-        self.log_display.append(f"\n--- Process State Clear Result ---\n{result.message}")
+        self.log_display.append(f"\n--- ผลลัพธ์การล้างสถานะการประมวลผล ---\n{result.message}")
         self.clear_process_state_button.setEnabled(True)
-        self.clear_process_state_button.setText(" Clear Process State")
+        self.clear_process_state_button.setText(" ล้างสถานะการประมวลผล")
 
     def on_date_changed(self):
         self.log_display.clear()
-        self.log_display.setPlainText(f"Date changed to: {self.date_select.date().toString(Qt.ISODate)}")
+        self.log_display.setPlainText(f"วันที่เปลี่ยนเป็น: {self.date_select.date().toString(Qt.ISODate)}")

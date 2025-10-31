@@ -31,18 +31,18 @@ class FormulaUpdater:
         base_path = config['base_path']
 
         # 2. Locate template file
-        year_dir = os.path.join(base_path, f"Year_{year:04d}")
-        template_file = os.path.join(year_dir, f"Monthly_Report_{month}_{year}.xlsx")
+        month_dir = os.path.join(base_path, f"Year_{year:04d}", f"Month_{month:02d}")
+        template_file = os.path.join(month_dir, f"Monthly_Report_{month}_{year}.xlsx")
         
         if not os.path.exists(template_file):
-            return Result.error(f"❌ Template file not found:\n{template_file}")
+            return Result.error(f"❌ ไม่พบไฟล์แม่แบบ:\n{template_file}")
 
         try:
             # 3. Open workbook and sheet
             wb = load_workbook(template_file)
             sheet_name = str(day)
             if sheet_name not in wb.sheetnames:
-                return Result.error(f"❌ Sheet '{sheet_name}' not found in the template file.")
+                return Result.error(f"❌ ไม่พบชีทชื่อ '{sheet_name}' ในไฟล์แม่แบบ")
             ws = wb[sheet_name]
 
             lazada_rows = []
@@ -95,12 +95,12 @@ class FormulaUpdater:
                 ws[f"I{row_grand_total}"] = f"=SUM(I{first_platform_row}:I{last_platform_row})"
 
             wb.save(template_file)
-            return Result.success("✅ Formulas updated successfully.")
+            return Result.success("✅ อัปเดตสูตรสำเร็จ")
 
         except PermissionError:
-            return Result.error(f"❌ Permission denied. The template file might be open:\n{template_file}\nPlease close it and try again.")
+            return Result.error(f"❌ การเข้าถึงถูกปฏิเสธ ไฟล์แม่แบบอาจถูกเปิดอยู่:\n{template_file}\nกรุณาปิดไฟล์แล้วลองอีกครั้ง")
         except Exception as e:
-            return Result.error(f"❌ An unexpected error occurred during formula update: {e}")
+            return Result.error(f"❌ เกิดข้อผิดพลาดที่ไม่คาดคิดระหว่างการอัปเดตสูตร: {e}")
 
     def _update_platform_formulas(self, ws, row_idx: int, platform: str, last_data_row: int, first_data_row: int):
         """Helper to update F, G, H formulas for a specific platform row."""

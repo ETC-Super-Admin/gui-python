@@ -40,7 +40,7 @@ class FileScanner:
             })
             
         except Exception as e:
-            return Result.error(f"❌ An unexpected error occurred while scanning files: {e}")
+            return Result.error(f"❌ เกิดข้อผิดพลาดที่ไม่คาดคิดขณะสแกนไฟล์: {e}")
     
     def _scan_template_file(self, year: int, month: int) -> Result:
         """Scan for the monthly template file."""
@@ -51,14 +51,14 @@ class FileScanner:
         )
         
         if not os.path.exists(month_dir):
-            return Result.error(f"❌ Month directory not found for template:\n{month_dir}")
+            return Result.error(f"❌ ไม่พบไดเรกทอรีเดือนสำหรับไฟล์แม่แบบ:\n{month_dir}")
 
         # Construct the expected template filename
         expected_template_filename = f"Monthly_Report_{month}_{year}.xlsx"
         template_file_path = os.path.join(month_dir, expected_template_filename)
         
         if not os.path.exists(template_file_path):
-            return Result.error(f"❌ Expected template file not found:\n{template_file_path}")
+            return Result.error(f"❌ ไม่พบไฟล์แม่แบบที่คาดไว้:\n{template_file_path}")
 
         return Result.success({
             'template_file_path': template_file_path,
@@ -75,12 +75,12 @@ class FileScanner:
         )
         
         if not os.path.exists(target_dir):
-            return Result.error(f"❌ Daily bills directory not found:\n{target_dir}")
+            return Result.error(f"❌ ไม่พบไดเรกทอรีบิลรายวัน:\n{target_dir}")
         
         files = [f for f in os.listdir(target_dir) if f.lower().endswith('.xlsx') and not f.startswith('~$')]
         
         if not files:
-            return Result.warning(f"No daily bill Excel files found in directory:\n{target_dir}", {
+            return Result.warning(f"ไม่พบไฟล์ Excel บิลรายวันในไดเรกทอรี:\n{target_dir}", {
                 'daily_files': [],
                 'target_dir': target_dir,
             })
