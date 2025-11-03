@@ -1,10 +1,17 @@
 import sqlite3
 
-DATABASE_NAME = "app_database.db"
+_DATABASE_PATH = "app_database.db"
 
-def initialize_delivery_db():
+def set_database_path(db_path):
+    """Sets the global database path. Should be called before any database operations."""
+    global _DATABASE_PATH
+    _DATABASE_PATH = db_path
+
+def initialize_delivery_db(db_path=None):
     """Initializes the DB, creates the table, and seeds it with initial data if empty."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    if db_path:
+        set_database_path(db_path)
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS delivery_options (
@@ -20,14 +27,14 @@ def initialize_delivery_db():
 
 def get_all_delivery_options():
     """Retrieves all delivery options from the database."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT name FROM delivery_options ORDER BY name")
         return [row[0] for row in cursor.fetchall()]
 
 def add_delivery_option(name):
     """Adds a new delivery option."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         try:
             cursor.execute("INSERT INTO delivery_options (name) VALUES (?)", (name,))
@@ -38,7 +45,7 @@ def add_delivery_option(name):
 
 def delete_delivery_option(name):
     """Deletes a delivery option."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         try:
             # In a real-world app, you might want to check if this option is in use.
@@ -50,7 +57,7 @@ def delete_delivery_option(name):
 
 def update_delivery_option(old_name, new_name):
     """Updates a delivery option and cascades the change to the receivers table."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         try:
             # Check if new name already exists

@@ -20,7 +20,7 @@ def create_table(cursor):
     """)
     print("Table 'thai_addresses' created or already exists.")
 
-def import_data():
+def import_data(db_path=DATABASE_NAME):
     """Parses the tambons.sql file and inserts data into the SQLite database."""
     conn = sqlite3.connect(DATABASE_NAME)
     cursor = conn.cursor()

@@ -1,13 +1,20 @@
 import sqlite3
 
-DATABASE_NAME = "app_database.db"
+_DATABASE_PATH = "app_database.db"
 
-def initialize_receiver_db():
+def set_database_path(db_path):
+    """Sets the global database path. Should be called before any database operations."""
+    global _DATABASE_PATH
+    _DATABASE_PATH = db_path
+
+def initialize_receiver_db(db_path=None):
     """
     Initializes the database and migrates the old single 'receivers' table 
     to a new structure with 'receiver_identities' and 'receiver_addresses' tables.
     """
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    if db_path:
+        set_database_path(db_path)
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
 
         # Check if migration is needed by looking for the old 'receivers' table schema
@@ -104,7 +111,7 @@ def initialize_receiver_db():
 
 def add_receiver_identity(name, tel):
     """Adds a new unique receiver and returns their ID."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         try:
             cursor.execute("INSERT INTO receiver_identities (name, tel) VALUES (?, ?)", (name, tel))
@@ -120,7 +127,7 @@ def add_receiver_identity(name, tel):
 
 def add_receiver_address(receiver_identity_id, data):
     """Adds a new address for a given receiver."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         try:
             cursor.execute("""
@@ -139,7 +146,7 @@ def add_receiver_address(receiver_identity_id, data):
 
 def get_all_receiver_identities():
     """Retrieves all unique receivers and includes a count of their addresses."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute("""
@@ -157,7 +164,7 @@ def get_all_receiver_identities():
 
 def get_addresses_for_receiver(receiver_identity_id):
     """Retrieves all addresses for a specific receiver."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM receiver_addresses WHERE receiver_identity_id = ? ORDER BY created_at DESC", (receiver_identity_id,))
@@ -165,7 +172,7 @@ def get_addresses_for_receiver(receiver_identity_id):
 
 def update_receiver_identity(receiver_id, name, tel):
     """Updates a receiver's name and telephone."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         try:
             cursor.execute("UPDATE receiver_identities SET name = ?, tel = ? WHERE id = ?", (name, tel, receiver_id))
@@ -178,7 +185,7 @@ def update_receiver_identity(receiver_id, name, tel):
 
 def update_receiver_address(address_id, data):
     """Updates a specific address."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         try:
             cursor.execute("""UPDATE receiver_addresses SET
@@ -196,7 +203,7 @@ def update_receiver_address(address_id, data):
 
 def delete_receiver_identity(receiver_id):
     """Deletes a receiver and all their associated addresses (due to CASCADE)."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         try:
             cursor.execute("DELETE FROM receiver_identities WHERE id = ?", (receiver_id,))
@@ -207,7 +214,7 @@ def delete_receiver_identity(receiver_id):
 
 def delete_receiver_address(address_id):
     """Deletes a single address."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         try:
             cursor.execute("DELETE FROM receiver_addresses WHERE id = ?", (address_id,))
@@ -218,7 +225,7 @@ def delete_receiver_address(address_id):
 
 def get_receiver_address_by_id(address_id):
     """Retrieves a single address by its ID."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM receiver_addresses WHERE id = ?", (address_id,))
@@ -227,7 +234,7 @@ def get_receiver_address_by_id(address_id):
 
 def find_exact_address(receiver_identity_id, address_detail, post_code):
     """Finds an address for a specific receiver to prevent duplicates."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute("""
@@ -239,7 +246,7 @@ def find_exact_address(receiver_identity_id, address_detail, post_code):
 
 def get_all_receiver_addresses():
     """Retrieves all addresses from the database, joined with receiver identity info."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute("""
@@ -265,7 +272,7 @@ def get_all_receiver_addresses():
 
 def set_default_address(receiver_identity_id, address_id):
     """Sets a specific address as the default for a receiver, clearing any previous default."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         try:
             # First, clear any existing default for this receiver
@@ -279,7 +286,7 @@ def set_default_address(receiver_identity_id, address_id):
 
 def get_receiver_identity_by_id(receiver_id):
     """Retrieves a single receiver identity by their ID."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM receiver_identities WHERE id = ?", (receiver_id,))

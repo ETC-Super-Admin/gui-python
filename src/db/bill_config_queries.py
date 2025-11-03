@@ -1,10 +1,17 @@
 import sqlite3
 
-DATABASE_NAME = "app_database.db"
+_DATABASE_PATH = "app_database.db"
 
-def initialize_bill_config_db():
+def set_database_path(db_path):
+    """Sets the global database path. Should be called before any database operations."""
+    global _DATABASE_PATH
+    _DATABASE_PATH = db_path
+
+def initialize_bill_config_db(db_path=None):
     """Initializes the database and creates the bill_configs table if it doesn't exist."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    if db_path:
+        set_database_path(db_path)
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS bill_configs (
@@ -22,7 +29,7 @@ def initialize_bill_config_db():
 
 def add_bill_config(data):
     """Adds a new bill configuration."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         try:
             cursor.execute("""INSERT INTO bill_configs 
@@ -36,7 +43,7 @@ def add_bill_config(data):
 
 def get_all_bill_configs():
     """Retrieves all bill configurations from the database."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute("SELECT id, field_name, config_type, focus, check_text, value FROM bill_configs ORDER BY field_name")
@@ -45,7 +52,7 @@ def get_all_bill_configs():
 
 def update_bill_config(config_id, data):
     """Updates an existing bill configuration."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         try:
             cursor.execute("""UPDATE bill_configs SET 
@@ -59,7 +66,7 @@ def update_bill_config(config_id, data):
 
 def delete_bill_config(config_id):
     """Deletes a bill configuration."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         try:
             cursor.execute("DELETE FROM bill_configs WHERE id = ?", (config_id,))

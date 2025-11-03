@@ -1,10 +1,17 @@
 import sqlite3
 
-DATABASE_NAME = "app_database.db"
+_DATABASE_PATH = "app_database.db"
 
-def initialize_path_config_db():
+def set_database_path(db_path):
+    """Sets the global database path. Should be called before any database operations."""
+    global _DATABASE_PATH
+    _DATABASE_PATH = db_path
+
+def initialize_path_config_db(db_path=None):
     """Initializes the database and creates the inventory_path_configs table if it doesn't exist."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    if db_path:
+        set_database_path(db_path)
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS inventory_path_configs (
@@ -16,7 +23,7 @@ def initialize_path_config_db():
 
 def add_path_config(inventory_code, template_dir):
     """Adds a new path configuration."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         try:
             cursor.execute("INSERT INTO inventory_path_configs (inventory_code, template_dir) VALUES (?, ?)", (inventory_code, template_dir))
@@ -29,7 +36,7 @@ def add_path_config(inventory_code, template_dir):
 
 def update_path_config(inventory_code, template_dir):
     """Updates an existing path configuration."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         try:
             cursor.execute("UPDATE inventory_path_configs SET template_dir = ? WHERE inventory_code = ?", (template_dir, inventory_code))
@@ -40,7 +47,7 @@ def update_path_config(inventory_code, template_dir):
 
 def delete_path_config(inventory_code):
     """Deletes a path configuration."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         try:
             cursor.execute("DELETE FROM inventory_path_configs WHERE inventory_code = ?", (inventory_code,))
@@ -51,7 +58,7 @@ def delete_path_config(inventory_code):
 
 def get_all_path_configs():
     """Retrieves all path configurations from the database."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute("SELECT inventory_code, template_dir FROM inventory_path_configs ORDER BY inventory_code")

@@ -1,13 +1,20 @@
 import sqlite3
 
-DATABASE_NAME = "app_database.db"
+_DATABASE_PATH = "app_database.db"
 
-def initialize_sender_db():
+def set_database_path(db_path):
+    """Sets the global database path. Should be called before any database operations."""
+    global _DATABASE_PATH
+    _DATABASE_PATH = db_path
+
+def initialize_sender_db(db_path=None):
     """
     Initializes the SQLite database. It checks for an old 'senders' table schema
     and replaces it with the new one, ensuring compatibility by dropping the old table.
     """
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    if db_path:
+        set_database_path(db_path)
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
 
         # Check if the table exists and has the old 'address' column
@@ -39,7 +46,7 @@ def initialize_sender_db():
 
 def add_sender(inventory_code, name, address_detail, sub_district, district, province, post_code, tel):
     """Adds a new sender to the database."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         try:
             cursor.execute("""
@@ -55,7 +62,7 @@ def add_sender(inventory_code, name, address_detail, sub_district, district, pro
 
 def get_all_senders():
     """Retrieves all senders from the database."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         conn.row_factory = sqlite3.Row # This allows accessing columns by name
         cursor = conn.cursor()
         cursor.execute("""
@@ -67,7 +74,7 @@ def get_all_senders():
 
 def update_sender(sender_id, inventory_code, name, address_detail, sub_district, district, province, post_code, tel):
     """Updates an existing sender's details."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         try:
             cursor.execute("""UPDATE senders SET 
@@ -88,7 +95,7 @@ def update_sender(sender_id, inventory_code, name, address_detail, sub_district,
 
 def delete_sender(sender_id):
     """Deletes a sender from the database by ID."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         try:
             cursor.execute("DELETE FROM senders WHERE id = ?", (sender_id,))
@@ -99,7 +106,7 @@ def delete_sender(sender_id):
 
 def get_distinct_inventory_codes():
     """Retrieves a unique list of all inventory codes from the senders table."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT DISTINCT inventory_code FROM senders ORDER BY inventory_code")
         codes = cursor.fetchall()

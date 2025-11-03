@@ -95,6 +95,7 @@ class ReceiverTableView(QWidget):
             add_button_layout.addStretch()
             self.add_button = QPushButton(qta.icon('fa5s.plus', color='white'), " Add Receiver")
             self.add_button.setObjectName("AddUserButton")
+            self.add_button.clicked.connect(self.add_receiver_requested.emit)
             add_button_layout.addWidget(self.add_button)
             header_layout.addLayout(add_button_layout)
 

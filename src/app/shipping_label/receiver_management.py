@@ -394,27 +394,27 @@ class ReceiverManagement(QWidget):
 
             for row_data in imported_data:
                 name = row_data.get('Name')
-                tel = str(row_data.get('Tel', ''))
+                tel = str(row_data.get('Tel') or '')
                 if not name: continue
 
                 receiver_id, _ = add_receiver_identity(name, tel)
                 if receiver_id is None: continue
 
-                delivery_by = row_data.get('Delivery By', '').strip()
+                delivery_by = (row_data.get('Delivery By') or '').strip()
                 if delivery_by and delivery_by not in delivery_options:
                     add_delivery_option(delivery_by)
                     delivery_options.add(delivery_by)
 
                 address_data = {
-                    'inventory_code': row_data.get('Inventory', ''),
-                    'address_detail': row_data.get('Address Details', ''),
-                    'sub_district': row_data.get('Sub-district', ''),
-                    'district': row_data.get('District', ''),
-                    'province': row_data.get('Province', ''),
-                    'post_code': str(row_data.get('Post Code', '')),
+                    'inventory_code': row_data.get('Inventory') or '',
+                    'address_detail': row_data.get('Address Details') or '',
+                    'sub_district': row_data.get('Sub-district') or '',
+                    'district': row_data.get('District') or '',
+                    'province': row_data.get('Province') or '',
+                    'post_code': str(row_data.get('Post Code') or ''),
                     'delivery_by': delivery_by,
-                    'zone': str(row_data.get('Zone', '')),
-                    'note': str(row_data.get('Note', ''))
+                    'zone': str(row_data.get('Zone') or ''),
+                    'note': str(row_data.get('Note') or '')
                 }
 
                 existing_address = find_exact_address(receiver_id, address_data['address_detail'], address_data['post_code'])

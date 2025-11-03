@@ -1,10 +1,17 @@
 import sqlite3
 
-DATABASE_NAME = "app_database.db"
+_DATABASE_PATH = "app_database.db"
 
-def initialize_config_db():
+def set_database_path(db_path):
+    """Sets the global database path. Should be called before any database operations."""
+    global _DATABASE_PATH
+    _DATABASE_PATH = db_path
+
+def initialize_config_db(db_path=None):
     """Initializes the database and creates the app_config table if it doesn't exist."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    if db_path:
+        set_database_path(db_path)
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS app_config (
@@ -16,7 +23,7 @@ def initialize_config_db():
 
 def save_config(key, value):
     """Saves a key-value pair to the config table. Replaces the value if the key already exists."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         try:
             cursor.execute("INSERT OR REPLACE INTO app_config (key, value) VALUES (?, ?)", (key, value))
@@ -27,7 +34,7 @@ def save_config(key, value):
 
 def get_config(key, default=None):
     """Retrieves a value from the config table for a given key."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT value FROM app_config WHERE key = ?", (key,))
         result = cursor.fetchone()

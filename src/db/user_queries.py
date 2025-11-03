@@ -1,11 +1,25 @@
 import sqlite3
 import hashlib
+import os
 
-DATABASE_NAME = "app_database.db"
+# Global variable to store the database path
+_DATABASE_PATH = "app_database.db"
 
-def initialize_db():
+def set_database_path(db_path):
+    """Sets the global database path. Should be called before any database operations."""
+    global _DATABASE_PATH
+    _DATABASE_PATH = db_path
+
+def get_database_path():
+    """Returns the current database path."""
+    return _DATABASE_PATH
+
+def initialize_db(db_path=None):
     """Initializes the SQLite database and creates the users table if it doesn't exist."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    if db_path:
+        set_database_path(db_path)
+    
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS users (
@@ -31,7 +45,7 @@ def hash_password(password):
 def add_user(username, password, email=None, role='user', avatar=None):
     """Adds a new user to the database."""
     password_hash = hash_password(password)
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         try:
             cursor.execute("INSERT INTO users (username, password_hash, email, role, avatar) VALUES (?, ?, ?, ?, ?)",
@@ -48,7 +62,7 @@ def add_user(username, password, email=None, role='user', avatar=None):
 
 def get_user_details(username):
     """Retrieves all details of a user by username."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT id, username, email, role, avatar, created_at FROM users WHERE username = ?", (username,))
         user_data = cursor.fetchone()
@@ -66,7 +80,7 @@ def get_user_details(username):
 def verify_user(username, password):
     """Verifies a user's credentials."""
     password_hash = hash_password(password)
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM users WHERE username = ? AND password_hash = ?",
                        (username, password_hash))
@@ -75,7 +89,7 @@ def verify_user(username, password):
 
 def get_user_role(username):
     """Retrieves the role of a user."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT role FROM users WHERE username = ?", (username,))
         result = cursor.fetchone()
@@ -83,7 +97,7 @@ def get_user_role(username):
 
 def get_all_users():
     """Retrieves all users from the database."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT id, username, email, role, avatar, created_at FROM users")
         users_data = cursor.fetchall()
@@ -101,7 +115,7 @@ def get_all_users():
 
 def update_user(user_id, username=None, password=None, email=None, role=None, avatar=None):
     """Updates an existing user's details in the database."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         updates = []
         params = []
@@ -143,7 +157,7 @@ def update_user(user_id, username=None, password=None, email=None, role=None, av
 
 def delete_user(user_id):
     """Deletes a user from the database by ID."""
-    with sqlite3.connect(DATABASE_NAME) as conn:
+    with sqlite3.connect(_DATABASE_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
         conn.commit()
