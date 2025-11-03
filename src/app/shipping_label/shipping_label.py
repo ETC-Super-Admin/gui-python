@@ -10,7 +10,7 @@ from src.components.custom_spinbox import CustomSpinBox
 from src.components.flow_layout import FlowLayout
 from src.app.shipping_label.components.receiver_table_view import ReceiverTableView
 from src.app.shipping_label.components.label_preview import LabelPreview
-from src.db.receiver_queries import get_all_receiver_identities, get_addresses_for_receiver, get_receiver_identity_by_id
+from src.db.receiver_queries import get_all_receiver_identities, get_all_receiver_addresses, get_addresses_for_receiver, get_receiver_identity_by_id
 from src.db.sender_queries import get_all_senders
 from src.db.config_queries import get_config
 from src.utils.widget_to_pdf import save_widget_as_pdf
@@ -42,6 +42,7 @@ class ShippingLabel(QWidget):
         panel_1_layout = QVBoxLayout(management_panel_1)
         panel_1_layout.setContentsMargins(0, 0, 0, 0) # The card style provides padding
         self.receiver_list_view = ReceiverTableView(show_add_button=False)
+        self.receiver_list_view.name_search_input.setPlaceholderText("Search by Name/Tel...")
         panel_1_layout.addWidget(self.receiver_list_view)
 
         management_panel_2 = self._create_management_panel_2()
@@ -188,7 +189,7 @@ class ShippingLabel(QWidget):
         
         bottom_row_layout.addWidget(page_setup_btn)
         bottom_row_layout.addWidget(save_pdf_btn)
-        bottom_row_layout.addWidget(print_btn)
+        # bottom_row_layout.addWidget(print_btn) # Commented out to hide the print button
 
         # Add rows to the main print layout
         main_print_layout.addLayout(top_row_layout)
@@ -217,8 +218,22 @@ class ShippingLabel(QWidget):
         self.label_preview.update_copy_count(value)
 
     def load_receiver_data(self):
-        receivers = get_all_receiver_identities()
-        self.receiver_list_view.populate_table(receivers)
+        receivers_with_addresses = self._get_receivers_with_addresses()
+        self.receiver_list_view.populate_table(receivers_with_addresses)
+
+    def _get_receivers_with_addresses(self):
+        identities = get_all_receiver_identities()
+        addresses = get_all_receiver_addresses()
+
+        receivers_dict = {r['id']: r for r in identities}
+        for r_id in receivers_dict:
+            receivers_dict[r_id]['addresses'] = []
+
+        for addr in addresses:
+            if addr['receiver_identity_id'] in receivers_dict:
+                receivers_dict[addr['receiver_identity_id']]['addresses'].append(addr)
+
+        return list(receivers_dict.values())
 
     def load_sender_data(self):
         self.senders_data = get_all_senders()

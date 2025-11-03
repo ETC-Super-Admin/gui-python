@@ -39,31 +39,37 @@ class ReceiverForm(QWidget):
 
         # --- Form Fields ---
         self.inventory_combo = QComboBox()
-        form_layout.addRow("Inventory:", self.inventory_combo)
+        form_layout.addRow("คลังสินค้า:", self.inventory_combo)
+
+        self.name_input = self._create_validated_line_edit("Receiver's Name", lambda text: (text.strip() != "", "Name cannot be empty."))
+        form_layout.addRow("ชื่อผู้รับ:", self.name_input)
+
+        self.tel_input = self._create_validated_line_edit("Receiver's Telephone", lambda text: (text.strip() != "", "Telephone cannot be empty."))
+        form_layout.addRow("โทรศัพท์:", self.tel_input)
 
         postcode_layout = self._create_postcode_lookup()
-        form_layout.addRow("Post Code Lookup:", postcode_layout)
+        form_layout.addRow("ค้นหาด้วยรหัสไปรษณีย์:", postcode_layout)
 
         self.province_combo = QComboBox()
         self.district_combo = QComboBox()
         self.sub_district_combo = QComboBox()
-        form_layout.addRow("Province:", self.province_combo)
-        form_layout.addRow("District:", self.district_combo)
-        form_layout.addRow("Sub-district:", self.sub_district_combo)
+        form_layout.addRow("จังหวัด:", self.province_combo)
+        form_layout.addRow("อำเภอ/เขต:", self.district_combo)
+        form_layout.addRow("ตำบล/แขวง:", self.sub_district_combo)
 
         self.address_detail_input = self._create_validated_line_edit("House No., Street, etc.", lambda text: (text.strip() != "", "Address details cannot be empty."))
-        form_layout.addRow("Address Details:", self.address_detail_input)
+        form_layout.addRow("รายละเอียดที่อยู่:", self.address_detail_input)
 
         self.delivery_by_combo = QComboBox()
-        form_layout.addRow("Delivery By:", self.delivery_by_combo)
+        form_layout.addRow("ขนส่งโดย:", self.delivery_by_combo)
 
         self.zone_input = QLineEdit()
         self.zone_input.setPlaceholderText("Enter zone (optional)")
-        form_layout.addRow("Zone:", self.zone_input)
+        form_layout.addRow("โซน:", self.zone_input)
 
         self.note_input = QLineEdit()
         self.note_input.setPlaceholderText("Enter note (optional)")
-        form_layout.addRow("Note:", self.note_input)
+        form_layout.addRow("หมายเหตุ:", self.note_input)
 
         # --- Action Buttons ---
         form_action_layout = self._create_action_buttons()
@@ -234,6 +240,8 @@ class ReceiverForm(QWidget):
         self.current_address_id = None
         self.form_groupbox.setTitle("Add New Address")
         self.delete_button.setVisible(False)
+        self.name_input.clear()
+        self.tel_input.clear()
         self.address_detail_input.clear()
         self.zone_input.clear()
         self.note_input.clear()
@@ -258,6 +266,8 @@ class ReceiverForm(QWidget):
         self.district_combo.blockSignals(True)
         self.sub_district_combo.blockSignals(True)
 
+        self.name_input.line_edit.setText(address_data.get("name", ""))
+        self.tel_input.line_edit.setText(address_data.get("tel", ""))
         self.inventory_combo.setCurrentText(address_data.get("inventory_code", ""))
         self.address_detail_input.line_edit.setText(address_data.get("address_detail", ""))
         self.postcode_input.setText(address_data.get("post_code", ""))
@@ -296,6 +306,8 @@ class ReceiverForm(QWidget):
 
         data = {
             "id": self.current_address_id,
+            "name": self.name_input.text(),
+            "tel": self.tel_input.text(),
             "inventory_code": self.inventory_combo.currentText(),
             "province": self.province_combo.currentText(),
             "district": self.district_combo.currentText(),

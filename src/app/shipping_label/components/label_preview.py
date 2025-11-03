@@ -90,7 +90,7 @@ class LabelPreview(QFrame):
             setattr(self, f"{prefix}_delivery_by_label", delivery_by_label)
             section_layout.addWidget(delivery_by_label)
 
-            note_label = QLabel("Note: ...")
+            note_label = QLabel("หมายเหตุ: ...")
             note_label.setWordWrap(True)
             note_label.setStyleSheet("font-size: 12px; color: #ef4444; font-style: italic;")
             setattr(self, f"{prefix}_note_label", note_label)
@@ -155,4 +155,4 @@ class LabelPreview(QFrame):
         self.update_sender_info("Select a sender", "")
 
     def clear_receiver_info(self):
-        self.update_receiver_info("TO", "Select a receiver from the list", "", "", "")
+        self.update_receiver_info("ถึง", "เลือกผู้รับจากรายการ", "", "", "")

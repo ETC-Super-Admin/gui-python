@@ -30,13 +30,13 @@ class ReceiverIdentityDialog(QDialog):
     """Dialog for adding or editing a receiver's name and telephone."""
     def __init__(self, current_name="", current_tel="", parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Receiver Details")
+        self.setWindowTitle("รายละเอียดผู้รับ")
         
         layout = QFormLayout(self)
         self.name_input = QLineEdit(current_name)
         self.tel_input = QLineEdit(current_tel)
-        layout.addRow("Name:", self.name_input)
-        layout.addRow("Telephone:", self.tel_input)
+        layout.addRow("ชื่อ:", self.name_input)
+        layout.addRow("โทรศัพท์:", self.tel_input)
 
         self.buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self.buttons.accepted.connect(self.accept)
@@ -74,14 +74,14 @@ class ReceiverManagement(QWidget):
         main_layout.setSpacing(20)
 
         title_layout = QHBoxLayout()
-        title_label = QLabel("Receiver Management")
+        title_label = QLabel("จัดการข้อมูลผู้รับ")
         title_label.setStyleSheet("font-size: 24px; font-weight: bold;")
         title_layout.addWidget(title_label)
         title_layout.addStretch()
 
-        self.import_button = QPushButton(qta.icon('fa5s.file-import', color='white'), " Import Excel")
+        self.import_button = QPushButton(qta.icon('fa5s.file-import', color='white'), " นำเข้า Excel")
         self.import_button.setObjectName("EditUserButton")
-        self.export_button = QPushButton(qta.icon('fa5s.file-export', color='white'), " Export Excel")
+        self.export_button = QPushButton(qta.icon('fa5s.file-export', color='white'), " ส่งออก Excel")
         self.export_button.setObjectName("ExportButton")
         
         title_layout.addWidget(self.import_button)
@@ -92,6 +92,7 @@ class ReceiverManagement(QWidget):
         main_layout.addLayout(content_layout)
 
         self.receivers_table_widget = ReceiverTableView()
+        self.receivers_table_widget.name_search_input.setPlaceholderText("Search by Name/Tel...")
         content_layout.addWidget(self.receivers_table_widget, 3)
 
         right_side_widget = QWidget()
@@ -99,7 +100,7 @@ class ReceiverManagement(QWidget):
         right_layout.setContentsMargins(0,0,0,0)
         content_layout.addWidget(right_side_widget, 7)
 
-        self.address_details_group = QGroupBox("Addresses")
+        self.address_details_group = QGroupBox("ที่อยู่")
         self.address_details_group.setObjectName("Card")
         details_layout = QVBoxLayout(self.address_details_group)
         right_layout.addWidget(self.address_details_group)
@@ -110,12 +111,12 @@ class ReceiverManagement(QWidget):
         address_actions_layout.addWidget(self.receiver_name_label)
         address_actions_layout.addStretch()
         
-        self.set_default_button = QPushButton(qta.icon('fa5s.star', color='#64748b'), " Set as Default")
+        self.set_default_button = QPushButton(qta.icon('fa5s.star', color='#64748b'), " ตั้งเป็นค่าเริ่มต้น")
         self.set_default_button.setEnabled(False)
-        self.edit_receiver_button = QPushButton(qta.icon('fa5s.edit', color='#64748b'), " Edit Receiver")
-        self.delete_receiver_button = QPushButton(qta.icon('fa5s.trash-alt', color='white'), " Delete Receiver")
+        self.edit_receiver_button = QPushButton(qta.icon('fa5s.edit', color='#64748b'), " แก้ไขผู้รับ")
+        self.delete_receiver_button = QPushButton(qta.icon('fa5s.trash-alt', color='white'), " ลบผู้รับ")
         self.delete_receiver_button.setObjectName("DeleteUserButton")
-        self.add_address_button = QPushButton(qta.icon('fa5s.plus', color='white'), " Add Address")
+        self.add_address_button = QPushButton(qta.icon('fa5s.plus', color='white'), " เพิ่มที่อยู่")
         self.add_address_button.setObjectName("AddUserButton")
 
         address_actions_layout.addWidget(self.set_default_button)
@@ -134,7 +135,7 @@ class ReceiverManagement(QWidget):
         table = QTableWidget()
         table.setAlternatingRowColors(True)
         table.setColumnCount(11)
-        table.setHorizontalHeaderLabels(["ID", "Default", "Inventory", "Address", "Sub-district", "District", "Province", "Post Code", "Delivery By", "Zone", "Note"])
+        table.setHorizontalHeaderLabels(["ID", "ค่าเริ่มต้น", "คลัง", "ที่อยู่", "ตำบล/แขวง", "อำเภอ/เขต", "จังหวัด", "รหัสไปรษณีย์", "ขนส่งโดย", "โซน", "หมายเหตุ"])
         table.setColumnHidden(0, True)
         header = table.horizontalHeader()
         header.setSectionResizeMode(3, QHeaderView.Stretch)
@@ -162,8 +163,22 @@ class ReceiverManagement(QWidget):
         self.address_form_widget.cancel_requested.connect(lambda: self.address_form_widget.hide())
 
     def load_receivers_to_table(self):
-        receivers = get_all_receiver_identities()
-        self.receivers_table_widget.populate_table(receivers)
+        receivers_with_addresses = self._get_receivers_with_addresses()
+        self.receivers_table_widget.populate_table(receivers_with_addresses)
+
+    def _get_receivers_with_addresses(self):
+        identities = get_all_receiver_identities()
+        addresses = get_all_receiver_addresses()
+
+        receivers_dict = {r['id']: r for r in identities}
+        for r_id in receivers_dict:
+            receivers_dict[r_id]['addresses'] = []
+
+        for addr in addresses:
+            if addr['receiver_identity_id'] in receivers_dict:
+                receivers_dict[addr['receiver_identity_id']]['addresses'].append(addr)
+
+        return list(receivers_dict.values())
 
     def on_receiver_selected(self, receiver_id):
         self.address_form_widget.hide()
@@ -174,7 +189,7 @@ class ReceiverManagement(QWidget):
         if receiver_id > 0:
             self.address_details_group.show()
             receiver_name = self.receivers_table_widget.table.item(self.receivers_table_widget.table.currentRow(), 1).text()
-            self.receiver_name_label.setText(f"Showing addresses for: {receiver_name}")
+            self.receiver_name_label.setText(f"ที่อยู่สำหรับ: {receiver_name}")
             self.populate_address_table(receiver_id)
         else:
             self.address_details_group.hide()
@@ -224,17 +239,17 @@ class ReceiverManagement(QWidget):
         if dialog.exec() == QDialog.Accepted:
             name, tel = dialog.get_data()
             if not name:
-                QMessageBox.warning(self, "Input Error", "Receiver name cannot be empty.")
+                QMessageBox.warning(self, "ข้อมูลไม่ถูกต้อง", "ชื่อผู้รับต้องไม่ว่างเปล่า")
                 return
             
             receiver_id, msg = add_receiver_identity(name, tel)
             if receiver_id is not None:
                 self.load_receivers_to_table()
                 self.receivers_table_widget.select_row_by_id(receiver_id)
-                QMessageBox.information(self, "Receiver Added", f"{msg} Now, please add their first address.")
+                QMessageBox.information(self, "เพิ่มผู้รับแล้ว", f"{msg} กรุณาเพิ่มที่อยู่แรก")
                 self.add_address()
             else:
-                QMessageBox.warning(self, "Error", msg)
+                QMessageBox.warning(self, "เกิดข้อผิดพลาด", msg)
 
     def edit_receiver(self):
         if not self.current_receiver_id: return
@@ -247,24 +262,24 @@ class ReceiverManagement(QWidget):
         if dialog.exec() == QDialog.Accepted:
             new_name, new_tel = dialog.get_data()
             if not new_name:
-                QMessageBox.warning(self, "Input Error", "Receiver name cannot be empty.")
+                QMessageBox.warning(self, "ข้อมูลไม่ถูกต้อง", "ชื่อผู้รับต้องไม่ว่างเปล่า")
                 return
             success, msg = update_receiver_identity(self.current_receiver_id, new_name, new_tel)
             if success:
                 self.load_receivers_to_table()
                 self.receivers_table_widget.select_row_by_id(self.current_receiver_id)
             else:
-                QMessageBox.warning(self, "Error", msg)
+                QMessageBox.warning(self, "เกิดข้อผิดพลาด", msg)
 
     def delete_receiver(self):
         if not self.current_receiver_id: return
-        reply = QMessageBox.question(self, 'Delete Receiver', "Are you sure you want to delete this receiver and ALL their addresses?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        reply = QMessageBox.question(self, 'ลบผู้รับ', "คุณแน่ใจหรือไม่ว่าต้องการลบผู้รับนี้และที่อยู่ทั้งหมดของพวกเขา?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
             success, msg = delete_receiver_identity(self.current_receiver_id)
             if success:
                 self.load_receivers_to_table()
             else:
-                QMessageBox.warning(self, "Error", msg)
+                QMessageBox.warning(self, "เกิดข้อผิดพลาด", msg)
 
     def add_address(self):
         if not self.current_receiver_id: return
@@ -274,7 +289,7 @@ class ReceiverManagement(QWidget):
 
     def delete_address(self, address_id):
         if not address_id: return
-        reply = QMessageBox.question(self, 'Delete Address', "Are you sure you want to delete this address?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        reply = QMessageBox.question(self, 'ลบที่อยู่', "คุณแน่ใจหรือไม่ว่าต้องการลบที่อยู่นี้?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
             success, msg = delete_receiver_address(address_id)
             if success:
@@ -283,7 +298,7 @@ class ReceiverManagement(QWidget):
                 self.receivers_table_widget.select_row_by_id(self.current_receiver_id)
                 self.address_form_widget.hide()
             else:
-                QMessageBox.warning(self, "Error", msg)
+                QMessageBox.warning(self, "เกิดข้อผิดพลาด", msg)
 
     def set_selected_address_as_default(self):
         if not self.current_address_id or not self.current_receiver_id: return
@@ -308,12 +323,12 @@ class ReceiverManagement(QWidget):
             QMessageBox.warning(self, "Database Error", msg)
 
     def export_all_receivers_data(self):
-        self.export_button.setText("Exporting...")
+        self.export_button.setText("กำลังส่งออก...")
         self.export_button.setEnabled(False)
         try:
             all_data = get_all_receiver_addresses()
             if not all_data:
-                QMessageBox.information(self, "Export", "There is no receiver data to export.")
+                QMessageBox.information(self, "ส่งออก", "ไม่มีข้อมูลผู้รับที่จะส่งออก")
                 return
 
             headers = ["Name", "Tel", "Inventory", "Address Details", "Sub-district", "District", "Province", "Post Code", "Delivery By", "Zone", "Note"]
@@ -336,7 +351,7 @@ class ReceiverManagement(QWidget):
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             default_filename = f"receivers_export_{timestamp}.xlsx"
             
-            file_path, _ = QFileDialog.getSaveFileName(self, "Save Excel File", os.path.join(last_dir, default_filename), "Excel Files (*.xlsx)")
+            file_path, _ = QFileDialog.getSaveFileName(self, "บันทึกไฟล์ Excel", os.path.join(last_dir, default_filename), "Excel Files (*.xlsx)")
 
             if not file_path: return
 
@@ -360,15 +375,15 @@ class ReceiverManagement(QWidget):
                 sheet.column_dimensions[column_letter].width = (max_length + 2) * 1.2
 
             workbook.save(file_path)
-            QMessageBox.information(self, "Export Successful", f"Data exported to\n{file_path}")
+            QMessageBox.information(self, "ส่งออกสำเร็จ", f"ส่งออกข้อมูลไปที่\n{file_path}")
         except Exception as e:
-            QMessageBox.warning(self, "Export Failed", f"An error occurred: {e}")
+            QMessageBox.warning(self, "ส่งออกล้มเหลว", f"เกิดข้อผิดพลาด: {e}")
         finally:
-            self.export_button.setText("Export Excel")
+            self.export_button.setText("ส่งออก Excel")
             self.export_button.setEnabled(True)
 
     def import_from_excel(self):
-        self.import_button.setText("Importing...")
+        self.import_button.setText("กำลังนำเข้า...")
         self.import_button.setEnabled(False)
         try:
             imported_data, filename = read_excel_to_dict_list(self)
@@ -416,11 +431,11 @@ class ReceiverManagement(QWidget):
                     added_count += 1
 
             self.load_receivers_to_table()
-            QMessageBox.information(self, "Import Complete", 
-                                    f"Successfully imported from {filename}\n\n"
-                                    f"New addresses added: {added_count}\n"
-                                    f"Addresses updated: {updated_count}\n"
-                                    f"Unchanged items: {unchanged_count}")
+            QMessageBox.information(self, "นำเข้าเสร็จสมบูรณ์", 
+                                    f"นำเข้าข้อมูลจาก {filename} สำเร็จ\n\n"
+                                    f"เพิ่มที่อยู่ใหม่: {added_count}\n"
+                                    f"อัปเดตที่อยู่: {updated_count}\n"
+                                    f"รายการที่ไม่เปลี่ยนแปลง: {unchanged_count}")
         finally:
-            self.import_button.setText("Import Excel")
+            self.import_button.setText("นำเข้า Excel")
             self.import_button.setEnabled(True)

@@ -246,6 +246,8 @@ def get_all_receiver_addresses():
             SELECT 
                 ri.name,
                 ri.tel,
+                ra.id as address_id,
+                ra.receiver_identity_id,
                 ra.inventory_code,
                 ra.address_detail,
                 ra.sub_district,

@@ -4,8 +4,8 @@ QLineEdit, QTextEdit, QPlainTextEdit {{
     color: {FOREGROUND};
     border: 1px solid {INPUT};
     border-radius: 6px;
-    padding: 8px 12px;
-    min-height: 20px;
+    padding: 6px 10px;
+    min-height: 16px;
 }}
 
 QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus {{
@@ -29,9 +29,9 @@ QComboBox {{
     color: {FOREGROUND};
     border: 1px solid {INPUT};
     border-radius: 6px;
-    padding: 8px 12px;
+    padding: 6px 10px;
     padding-left: 10px;
-    min-height: 20px;
+    min-height: 16px;
 }}
 
 QComboBox:focus {{
@@ -105,8 +105,8 @@ QSpinBox:hover {{
     border-bottom-left-radius: 6px;
     background-color: {CARD};
     color: {FOREGROUND};
-    padding: 8px 12px;
-    min-height: 20px;
+    padding: 6px 10px;
+    min-height: 16px;
 }}
 #CustomSpinBox QLineEdit#SpinBoxLineEdit:focus {{
     border: 2px solid {RING};
@@ -121,8 +121,8 @@ QSpinBox:hover {{
     border-left: 1px solid {BORDER};
     border-right: none;
     border-radius: 0px;
-    padding: 8px;
-    min-height: 20px;
+    padding: 6px;
+    min-height: 16px;
 }}
 
 #CustomSpinBox QPushButton#MinusSpinBoxButton {{
@@ -131,8 +131,8 @@ QSpinBox:hover {{
     border-left: 1px solid {BORDER};
     border-top-right-radius: 6px;
     border-bottom-right-radius: 6px;
-    padding: 8px;
-    min-height: 20px;
+    padding: 6px;
+    min-height: 16px;
 }}
 
 #CustomSpinBox QPushButton:hover {{

@@ -22,6 +22,7 @@ class Sidebar(QWidget):
         self.shipping_label_expanded = False
         self.username = username
         self.role = role
+        self.setMinimumWidth(220)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
